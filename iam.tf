@@ -1,4 +1,4 @@
-resource "aws_iam_role" "amplify_role" {
+/*resource "aws_iam_role" "amplify_role" {
   name = "${var.app_name}-amplify-role"
 
   assume_role_policy = jsonencode({
@@ -48,3 +48,4 @@ resource "aws_iam_role_policy" "amplify_logs" {
     ]
   })
 }
+*/

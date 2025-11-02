@@ -1,60 +1,32 @@
-resource "aws_amplify_app" "react_app" {
-  name                 = var.app_name
-  repository           = var.github_repository
-  platform             = "WEB"
-  access_token         = var.github_token
-  iam_service_role_arn = aws_iam_role.amplify_role.arn
+# ============================================
+# PHASE 1: VPC + API Gateway (Bridge to VPC)
+# ============================================
 
-  build_spec = file("${path.module}/amplify.yml")
+# Networking Module - VPC con subnets públicas y privadas
+module "networking" {
+  source = "./modules/networking"
 
-  # Variables de entorno
-  environment_variables = {
-    _LIVE_UPDATES = "[{\"pkg\":\"node\",\"type\":\"nvm\",\"version\":\"20\"}]"
-  }
-
-  # Regla SPA - Fundamental para React Router
-  # Redirige todas las rutas (excepto archivos estáticos) al index.html
-  custom_rule {
-    source = "/<*>"
-    status = "404-200"
-    target = "/index.html"
-  }
-
-  tags = {
-    Name        = var.app_name
-    ManagedBy   = "terraform"
-    Project     = "cloud-react"
-    Environment = "production"
-  }
+  project_name        = var.project_name
+  vpc_cidr            = var.vpc_cidr
+  public_subnet_cidr  = var.public_subnet_cidr
+  private_subnet_cidr = var.private_subnet_cidr
 }
 
-# ============================================
-# AMPLIFY BRANCH
-# ============================================
+# API Gateway Module - REST API como puente público
+module "api_gateway" {
+  source = "./modules/api_gateway"
 
-resource "aws_amplify_branch" "main" {
-  app_id            = aws_amplify_app.react_app.id
-  branch_name       = var.branch_name
-  framework         = "React"
-  stage             = "PRODUCTION"
-  enable_auto_build = true
+  project_name = var.project_name
 
-  environment_variables = {
-    VITE_ENV = "production"
-  }
-
-  tags = {
-    Name        = "${var.app_name}-${var.branch_name}"
-    Environment = "production"
-  }
+  depends_on = [module.networking]
 }
 
-# ============================================
-# WEBHOOK PARA BUILDS AUTOMÁTICOS
-# ============================================
+module "dynamodb" {
+  source = "./modules/dynamodb"
 
-resource "aws_amplify_webhook" "main" {
-  app_id      = aws_amplify_app.react_app.id
-  branch_name = aws_amplify_branch.main.branch_name
-  description = "Webhook para builds automáticos en ${var.branch_name}"
+  project_name                  = var.project_name
+  enable_point_in_time_recovery = false
+  enable_streams                = false
 }
+
+//PONER NUeVOS CAMBIOS AQUI
