@@ -1,20 +1,6 @@
-data "aws_iam_policy_document" "secret_access" {
-  statement {
-    effect = "Allow"
+data "aws_caller_identity" "current" {}
 
-    principals {
-      type        = "AWS"
-      identifiers = var.lambda_role_arns
-    }
-
-    actions = [
-      "secretsmanager:GetSecretValue",
-      "secretsmanager:DescribeSecret"
-    ]
-
-    resources = [aws_secretsmanager_secret.bedrock_config.arn]
-  }
-}
+data "aws_region" "current" {}
 
 
 resource "aws_iam_role" "lambda_role" {
@@ -38,11 +24,6 @@ resource "aws_iam_role" "lambda_role" {
   }
 }
 
-# ============================================
-# IAM POLICIES
-# ============================================
-
-# Policy para CloudWatch Logs
 resource "aws_iam_role_policy" "lambda_logs" {
   name = "${var.project_name}-lambda-logs-policy"
   role = aws_iam_role.lambda_role.id
@@ -63,7 +44,6 @@ resource "aws_iam_role_policy" "lambda_logs" {
   })
 }
 
-# Policy para DynamoDB
 resource "aws_iam_role_policy" "lambda_dynamodb" {
   name = "${var.project_name}-lambda-dynamodb-policy"
   role = aws_iam_role.lambda_role.id
@@ -90,7 +70,6 @@ resource "aws_iam_role_policy" "lambda_dynamodb" {
   })
 }
 
-# Policy para Bedrock
 resource "aws_iam_role_policy" "lambda_bedrock" {
   name = "${var.project_name}-lambda-bedrock-policy"
   role = aws_iam_role.lambda_role.id
@@ -110,7 +89,25 @@ resource "aws_iam_role_policy" "lambda_bedrock" {
   })
 }
 
-# Policy para VPC (necesario para Lambdas en VPC)
+resource "aws_iam_role_policy" "lambda_secrets" {
+  name = "${var.project_name}-lambda-secrets-policy"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.project_name}/*"
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role_policy" "lambda_vpc" {
   name = "${var.project_name}-lambda-vpc-policy"
   role = aws_iam_role.lambda_role.id
@@ -132,3 +129,4 @@ resource "aws_iam_role_policy" "lambda_vpc" {
     ]
   })
 }
+

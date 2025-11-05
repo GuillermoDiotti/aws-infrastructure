@@ -44,10 +44,6 @@ module "secrets_manager" {
   bedrock_temperature = 0.7
   bedrock_max_tokens = 2000
 
-  # Nota: lambda_role_arns se pasa después de crear lambdas
-  lambda_role_arns = [
-    module.lambda_articulos.lambda_role_arn,
-  ]
 }
 
 module "lambda_articulos" {
@@ -71,32 +67,6 @@ module "lambda_articulos" {
   ]
 }
 
-resource "aws_secretsmanager_secret_policy" "lambda_access" {
-  secret_arn = module.secrets.bedrock_config_secret_arn
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = {
-          AWS = module.lambda.lambda_role_arn
-        }
-        Action = [
-          "secretsmanager:GetSecretValue",
-          "secretsmanager:DescribeSecret"
-        ]
-        Resource = module.secrets.bedrock_config_secret_arn
-      }
-    ]
-  })
-
-  depends_on = [
-    module.secrets,
-    module.lambda
-  ]
-}
-
 module "eventbridge" {
   source = "./modules/eventbridge"
 
@@ -105,7 +75,7 @@ module "eventbridge" {
   lambda_function_name = module.lambda.generate_article_function_name
   lambda_function_arn  = module.lambda.generate_article_function_arn
 
-  depends_on = [module.lambda]
+  depends_on = [module.lambda_articulos]
 }
 
 # API Gateway Module - REST API como puente público

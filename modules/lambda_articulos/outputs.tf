@@ -27,8 +27,3 @@ output "get_article_invoke_arn" {
   description = "Get Article Lambda invoke ARN (for API Gateway)"
   value       = aws_lambda_function.get_article.invoke_arn
 }
-
-output "lambda_role_arn" {
-  description = "IAM Role ARN for Lambda functions"
-  value       = aws_iam_role.lambda_role.arn
-}

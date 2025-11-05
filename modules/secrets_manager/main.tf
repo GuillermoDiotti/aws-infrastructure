@@ -24,14 +24,3 @@ resource "aws_secretsmanager_secret_version" "bedrock_config" {
     default_length        = "medium"
   })
 }
-
-# ============================================
-# IAM POLICY - Permitir que Lambdas lean el secret
-# ============================================
-
-
-
-resource "aws_secretsmanager_secret_policy" "bedrock_config" {
-  secret_arn = aws_secretsmanager_secret.bedrock_config.arn
-  policy     = data.aws_iam_policy_document.secret_access.json
-}

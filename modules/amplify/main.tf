@@ -1,3 +1,7 @@
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
 resource "aws_iam_role" "amplify_role" {
   name = "${var.app_name}-amplify-role"
 
@@ -56,7 +60,7 @@ resource "aws_amplify_app" "react_app" {
   access_token         = var.github_token
   iam_service_role_arn = aws_iam_role.amplify_role.arn
 
-  build_spec = file("${path.module}/amplify.yml")
+  build_spec = file("${path.root}/amplify.yml")
 
   # Variables de entorno
   environment_variables = {

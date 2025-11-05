@@ -5,7 +5,7 @@ set -e
 echo "📦 Creating Lambda ZIP files..."
 echo ""
 
-BASE_DIR="modules/lambda"
+BASE_DIR="modules/lambda_articulos"
 PY_DIR="$BASE_DIR/py"
 ZIP_DIR="$BASE_DIR/zip"
 
@@ -27,7 +27,7 @@ ZIP_FILE="$ZIP_DIR/lambda_${LAMBDA_NAME}.zip"
 
 if [ -f "$LAMBDA_PY_DIR/index.py" ]; then
     cd "$LAMBDA_PY_DIR"
-    zip -r "../../../zip/lambda_${LAMBDA_NAME}.zip" . > /dev/null 2>&1
+    zip -r "../../zip/lambda_${LAMBDA_NAME}.zip" . > /dev/null 2>&1
     cd - > /dev/null
 
     SIZE=$(ls -lh "$ZIP_FILE" | awk '{print $5}')
@@ -46,7 +46,7 @@ ZIP_FILE="$ZIP_DIR/lambda_${LAMBDA_NAME}.zip"
 
 if [ -f "$LAMBDA_PY_DIR/index.py" ]; then
     cd "$LAMBDA_PY_DIR"
-    zip -r "../../../zip/lambda_${LAMBDA_NAME}.zip" . > /dev/null 2>&1
+    zip -r "../../zip/lambda_${LAMBDA_NAME}.zip" . > /dev/null 2>&1
     cd - > /dev/null
 
     SIZE=$(ls -lh "$ZIP_FILE" | awk '{print $5}')

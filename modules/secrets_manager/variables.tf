@@ -20,8 +20,3 @@ variable "bedrock_max_tokens" {
   type        = number
   default     = 2000
 }
-
-variable "lambda_role_arns" {
-  description = "List of Lambda role ARNs that need access to secrets"
-  type        = list(string)
-}
