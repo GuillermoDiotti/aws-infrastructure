@@ -72,8 +72,8 @@ module "eventbridge" {
 
   project_name         = var.project_name
   schedule_expression  = var.article_generation_schedule
-  lambda_function_name = module.lambda.generate_article_function_name
-  lambda_function_arn  = module.lambda.generate_article_function_arn
+  lambda_function_name = module.lambda_articulos.generate_article_function_name  # CORREGIR
+  lambda_function_arn  = module.lambda_articulos.generate_article_function_arn   # CORREGIR
 
   depends_on = [module.lambda_articulos]
 }
@@ -84,5 +84,11 @@ module "api_gateway" {
 
   project_name = var.project_name
 
-  depends_on = [module.networking]
+  # Conectar Lambdas
+  get_article_lambda_function_name      = module.lambda_articulos.get_article_function_name
+  get_article_lambda_invoke_arn         = module.lambda_articulos.get_article_invoke_arn
+  generate_article_lambda_function_name = module.lambda_articulos.generate_article_function_name
+  generate_article_lambda_invoke_arn    = module.lambda_articulos.generate_article_invoke_arn
+
+  depends_on = [module.networking, module.lambda_articulos]
 }

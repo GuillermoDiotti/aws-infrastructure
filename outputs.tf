@@ -1,3 +1,4 @@
+# outputs.tf - CORREGIR
 output "deployment_commands" {
   description = "Comandos útiles para deployment"
   value = <<-EOT
@@ -5,7 +6,7 @@ output "deployment_commands" {
     🚀 DEPLOYMENT COMPLETADO
     ========================
 
-    📍 URL de la app: https://${aws_amplify_branch.main.branch_name}.${aws_amplify_app.react_app.default_domain}
+    📍 URL de la app: ${module.amplify.amplify_app_url}
 
     🔧 Para ver logs:
        aws amplify list-jobs --app-id ${module.amplify.amplify_app_id} --branch-name ${module.amplify.branch_name}
@@ -14,7 +15,7 @@ output "deployment_commands" {
        aws amplify start-job --app-id ${module.amplify.amplify_app_id} --branch-name ${module.amplify.branch_name} --job-type RELEASE
 
     📊 Monitorear en consola:
-       https://console.aws.amazon.com/amplify/home?region=${data.aws_region.current.name}#/${aws_amplify_app.react_app.id}
+       https://console.aws.amazon.com/amplify/home?region=${data.aws_region.current.name}#/${module.amplify.amplify_app_id}
   EOT
 }
 

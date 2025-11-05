@@ -5,7 +5,7 @@ set -e
 echo "📦 Creating Lambda ZIP files..."
 echo ""
 
-BASE_DIR="modules/lambda_articulos"
+BASE_DIR="modules/lambda_articulos/functions"
 PY_DIR="$BASE_DIR/py"
 ZIP_DIR="$BASE_DIR/zip"
 

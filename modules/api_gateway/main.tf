@@ -1,11 +1,10 @@
 # ============================================
 # API GATEWAY REST API
 # ============================================
-# REST API que actuará como puente público hacia la VPC privada
 
 resource "aws_api_gateway_rest_api" "main" {
   name        = "${var.project_name}-articles-api"
-  description = "REST API for AI Articles - Bridge to VPC"
+  description = "REST API for AI Articles"
 
   endpoint_configuration {
     types = ["REGIONAL"]
@@ -17,17 +16,15 @@ resource "aws_api_gateway_rest_api" "main" {
 }
 
 # ============================================
-# RESOURCES (rutas)
+# RESOURCES
 # ============================================
 
-# Resource: /articles
 resource "aws_api_gateway_resource" "articles" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   parent_id   = aws_api_gateway_rest_api.main.root_resource_id
   path_part   = "articles"
 }
 
-# Resource: /articles/{id}
 resource "aws_api_gateway_resource" "article_id" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   parent_id   = aws_api_gateway_resource.articles.id
@@ -35,68 +32,7 @@ resource "aws_api_gateway_resource" "article_id" {
 }
 
 # ============================================
-# METHODS - POST /articles
-# ============================================
-
-resource "aws_api_gateway_method" "post_articles" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id   = aws_api_gateway_resource.articles.id
-  http_method   = "POST"
-  authorization = "NONE"
-}
-
-# Mock integration (temporal hasta que conectemos Lambda)
-resource "aws_api_gateway_integration" "post_articles_mock" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.articles.id
-  http_method = aws_api_gateway_method.post_articles.http_method
-
-  type = "MOCK"
-
-  request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
-  }
-}
-
-resource "aws_api_gateway_method_response" "post_articles_200" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.articles.id
-  http_method = aws_api_gateway_method.post_articles.http_method
-  status_code = "200"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true
-  }
-
-  response_models = {
-    "application/json" = "Empty"
-  }
-}
-
-resource "aws_api_gateway_integration_response" "post_articles_200" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.articles.id
-  http_method = aws_api_gateway_method.post_articles.http_method
-  status_code = aws_api_gateway_method_response.post_articles_200.status_code
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = "'*'"
-  }
-
-  response_templates = {
-    "application/json" = jsonencode({
-      message = "API Gateway configured - Lambda integration pending"
-      status  = "mock_response"
-    })
-  }
-
-  depends_on = [aws_api_gateway_integration.post_articles_mock]
-}
-
-# ============================================
-# METHODS - GET /articles
+# GET /articles - Lista todos los artículos
 # ============================================
 
 resource "aws_api_gateway_method" "get_articles" {
@@ -106,53 +42,18 @@ resource "aws_api_gateway_method" "get_articles" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration" "get_articles_mock" {
+resource "aws_api_gateway_integration" "get_articles" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   resource_id = aws_api_gateway_resource.articles.id
   http_method = aws_api_gateway_method.get_articles.http_method
 
-  type = "MOCK"
-
-  request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
-  }
-}
-
-resource "aws_api_gateway_method_response" "get_articles_200" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.articles.id
-  http_method = aws_api_gateway_method.get_articles.http_method
-  status_code = "200"
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true
-  }
-}
-
-resource "aws_api_gateway_integration_response" "get_articles_200" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.articles.id
-  http_method = aws_api_gateway_method.get_articles.http_method
-  status_code = aws_api_gateway_method_response.get_articles_200.status_code
-
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = "'*'"
-  }
-
-  response_templates = {
-    "application/json" = jsonencode({
-      message  = "API Gateway configured - Lambda integration pending"
-      articles = []
-    })
-  }
-
-  depends_on = [aws_api_gateway_integration.get_articles_mock]
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.get_article_lambda_invoke_arn
 }
 
 # ============================================
-# METHODS - GET /articles/{id}
+# GET /articles/{id} - Obtiene un artículo específico
 # ============================================
 
 resource "aws_api_gateway_method" "get_article_by_id" {
@@ -166,56 +67,41 @@ resource "aws_api_gateway_method" "get_article_by_id" {
   }
 }
 
-resource "aws_api_gateway_integration" "get_article_by_id_mock" {
+resource "aws_api_gateway_integration" "get_article_by_id" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   resource_id = aws_api_gateway_resource.article_id.id
   http_method = aws_api_gateway_method.get_article_by_id.http_method
 
-  type = "MOCK"
-
-  request_templates = {
-    "application/json" = jsonencode({
-      statusCode = 200
-    })
-  }
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.get_article_lambda_invoke_arn
 }
 
-resource "aws_api_gateway_method_response" "get_article_by_id_200" {
-  rest_api_id = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.article_id.id
-  http_method = aws_api_gateway_method.get_article_by_id.http_method
-  status_code = "200"
+# ============================================
+# POST /articles - Generar nuevo artículo
+# ============================================
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true
-  }
+resource "aws_api_gateway_method" "post_articles" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.articles.id
+  http_method   = "POST"
+  authorization = "NONE"
 }
 
-resource "aws_api_gateway_integration_response" "get_article_by_id_200" {
+resource "aws_api_gateway_integration" "post_articles" {
   rest_api_id = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_resource.article_id.id
-  http_method = aws_api_gateway_method.get_article_by_id.http_method
-  status_code = aws_api_gateway_method_response.get_article_by_id_200.status_code
+  resource_id = aws_api_gateway_resource.articles.id
+  http_method = aws_api_gateway_method.post_articles.http_method
 
-  response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = "'*'"
-  }
-
-  response_templates = {
-    "application/json" = jsonencode({
-      message = "API Gateway configured - Lambda integration pending"
-      id      = "$input.params('id')"
-    })
-  }
-
-  depends_on = [aws_api_gateway_integration.get_article_by_id_mock]
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.generate_article_lambda_invoke_arn
 }
 
 # ============================================
 # CORS - OPTIONS methods
 # ============================================
 
-# OPTIONS /articles
 resource "aws_api_gateway_method" "options_articles" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.articles.id
@@ -265,6 +151,76 @@ resource "aws_api_gateway_integration_response" "options_articles_200" {
   depends_on = [aws_api_gateway_integration.options_articles]
 }
 
+# OPTIONS /articles/{id}
+resource "aws_api_gateway_method" "options_article_id" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.article_id.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "options_article_id" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.article_id.id
+  http_method = aws_api_gateway_method.options_article_id.http_method
+
+  type = "MOCK"
+
+  request_templates = {
+    "application/json" = jsonencode({
+      statusCode = 200
+    })
+  }
+}
+
+resource "aws_api_gateway_method_response" "options_article_id_200" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.article_id.id
+  http_method = aws_api_gateway_method.options_article_id.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "options_article_id_200" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.article_id.id
+  http_method = aws_api_gateway_method.options_article_id.http_method
+  status_code = aws_api_gateway_method_response.options_article_id_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+
+  depends_on = [aws_api_gateway_integration.options_article_id]
+}
+
+# ============================================
+# LAMBDA PERMISSIONS
+# ============================================
+
+resource "aws_lambda_permission" "api_gateway_get_article" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.get_article_lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "api_gateway_generate_article" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.generate_article_lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
 # ============================================
 # DEPLOYMENT
 # ============================================
@@ -276,12 +232,12 @@ resource "aws_api_gateway_deployment" "main" {
     redeployment = sha1(jsonencode([
       aws_api_gateway_resource.articles.id,
       aws_api_gateway_resource.article_id.id,
-      aws_api_gateway_method.post_articles.id,
       aws_api_gateway_method.get_articles.id,
       aws_api_gateway_method.get_article_by_id.id,
-      aws_api_gateway_integration.post_articles_mock.id,
-      aws_api_gateway_integration.get_articles_mock.id,
-      aws_api_gateway_integration.get_article_by_id_mock.id,
+      aws_api_gateway_method.post_articles.id,
+      aws_api_gateway_integration.get_articles.id,
+      aws_api_gateway_integration.get_article_by_id.id,
+      aws_api_gateway_integration.post_articles.id,
     ]))
   }
 
@@ -290,18 +246,11 @@ resource "aws_api_gateway_deployment" "main" {
   }
 
   depends_on = [
-    aws_api_gateway_integration.post_articles_mock,
-    aws_api_gateway_integration.get_articles_mock,
-    aws_api_gateway_integration.get_article_by_id_mock,
-    aws_api_gateway_integration_response.post_articles_200,
-    aws_api_gateway_integration_response.get_articles_200,
-    aws_api_gateway_integration_response.get_article_by_id_200,
+    aws_api_gateway_integration.get_articles,
+    aws_api_gateway_integration.get_article_by_id,
+    aws_api_gateway_integration.post_articles,
   ]
 }
-
-# ============================================
-# STAGE
-# ============================================
 
 resource "aws_api_gateway_stage" "prod" {
   deployment_id = aws_api_gateway_deployment.main.id
@@ -314,7 +263,7 @@ resource "aws_api_gateway_stage" "prod" {
 }
 
 # ============================================
-# CLOUDWATCH LOGS (opcional)
+# CLOUDWATCH LOGS
 # ============================================
 
 resource "aws_cloudwatch_log_group" "api_gateway" {
