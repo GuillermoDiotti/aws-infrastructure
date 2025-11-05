@@ -7,9 +7,40 @@ from datetime import datetime, timedelta
 # Clientes AWS
 dynamodb = boto3.resource('dynamodb')
 bedrock = boto3.client('bedrock-runtime')
+secrets_client = boto3.client('secretsmanager')
 
 TABLE_NAME = os.environ['DYNAMODB_TABLE']
+SECRET_NAME = os.environ.get('BEDROCK_SECRET_NAME')
 table = dynamodb.Table(TABLE_NAME)
+
+# Cache para la configuración
+bedrock_config_cache = None
+
+def get_bedrock_config():
+    """Obtener configuración de Bedrock desde Secrets Manager"""
+    global bedrock_config_cache
+
+    if bedrock_config_cache:
+        return bedrock_config_cache
+
+    try:
+        if SECRET_NAME:
+            print(f"🔐 Getting Bedrock config from Secrets Manager: {SECRET_NAME}")
+            response = secrets_client.get_secret_value(SecretId=SECRET_NAME)
+            bedrock_config_cache = json.loads(response['SecretString'])
+            print(f"✅ Using model: {bedrock_config_cache.get('model_id')}")
+            return bedrock_config_cache
+    except Exception as e:
+        print(f"⚠️ Could not get secret, using defaults: {e}")
+
+    # Fallback configuration
+    bedrock_config_cache = {
+        'model_id': 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+        'temperature': 0.7,
+        'max_tokens': 2000,
+        'anthropic_version': 'bedrock-2023-05-31'
+    }
+    return bedrock_config_cache
 
 def handler(event, context):
     """

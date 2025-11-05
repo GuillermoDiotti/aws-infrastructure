@@ -1,5 +1,5 @@
-/*variable "aws_region" {
-  description = "Región de AWS"
+variable "aws_region" {
+  description = "AWS Region"
   type        = string
   default     = "us-east-1"
 }
@@ -26,13 +26,6 @@ variable "branch_name" {
   description = "Nombre de la rama principal"
   type        = string
   default     = "main"
-}
-*/
-
-variable "aws_region" {
-  description = "AWS Region"
-  type        = string
-  default     = "us-east-1"
 }
 
 variable "project_name" {
@@ -64,4 +57,16 @@ variable "private_subnet_cidr" {
   description = "CIDR block for private subnet"
   type        = string
   default     = "10.0.2.0/24"
+}
+
+variable "bedrock_model_id" {
+  description = "Bedrock model ID for AI generation"
+  type        = string
+  default     = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+}
+
+variable "article_generation_schedule" {
+  description = "Schedule expression for automatic article generation"
+  type        = string
+  default     = "rate(15 minutes)"
 }

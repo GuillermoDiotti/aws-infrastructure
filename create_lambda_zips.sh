@@ -5,12 +5,10 @@ set -e
 echo "📦 Creating Lambda ZIP files..."
 echo ""
 
-# Directorio base
-BASE_DIR="modules/lambda/functions"
+BASE_DIR="modules/lambda"
 PY_DIR="$BASE_DIR/py"
 ZIP_DIR="$BASE_DIR/zip"
 
-# Verificar que existe el directorio py
 if [ ! -d "$PY_DIR" ]; then
     echo "❌ Error: Directory $PY_DIR does not exist"
     echo "Please create the directory structure first:"
@@ -19,12 +17,7 @@ if [ ! -d "$PY_DIR" ]; then
     exit 1
 fi
 
-# Crear directorio zip si no existe
 mkdir -p "$ZIP_DIR"
-
-# ============================================
-# Generate Article Lambda
-# ============================================
 
 echo "📝 Processing generate_article..."
 
@@ -33,16 +26,10 @@ LAMBDA_PY_DIR="$PY_DIR/$LAMBDA_NAME"
 ZIP_FILE="$ZIP_DIR/lambda_${LAMBDA_NAME}.zip"
 
 if [ -f "$LAMBDA_PY_DIR/index.py" ]; then
-    # Ir al directorio de la lambda
     cd "$LAMBDA_PY_DIR"
-
-    # Crear ZIP
     zip -r "../../../zip/lambda_${LAMBDA_NAME}.zip" . > /dev/null 2>&1
-
-    # Volver al directorio original
     cd - > /dev/null
 
-    # Verificar tamaño
     SIZE=$(ls -lh "$ZIP_FILE" | awk '{print $5}')
     echo "   ✅ Created: lambda_${LAMBDA_NAME}.zip ($SIZE)"
 else
@@ -50,10 +37,6 @@ else
     echo "      Please create the file first"
     exit 1
 fi
-
-# ============================================
-# Get Article Lambda
-# ============================================
 
 echo "📝 Processing get_article..."
 
@@ -62,16 +45,10 @@ LAMBDA_PY_DIR="$PY_DIR/$LAMBDA_NAME"
 ZIP_FILE="$ZIP_DIR/lambda_${LAMBDA_NAME}.zip"
 
 if [ -f "$LAMBDA_PY_DIR/index.py" ]; then
-    # Ir al directorio de la lambda
     cd "$LAMBDA_PY_DIR"
-
-    # Crear ZIP
     zip -r "../../../zip/lambda_${LAMBDA_NAME}.zip" . > /dev/null 2>&1
-
-    # Volver al directorio original
     cd - > /dev/null
 
-    # Verificar tamaño
     SIZE=$(ls -lh "$ZIP_FILE" | awk '{print $5}')
     echo "   ✅ Created: lambda_${LAMBDA_NAME}.zip ($SIZE)"
 else
@@ -79,10 +56,6 @@ else
     echo "      Please create the file first"
     exit 1
 fi
-
-# ============================================
-# Summary
-# ============================================
 
 echo ""
 echo "📊 Summary:"
@@ -99,7 +72,3 @@ fi
 echo ""
 echo "✅ Done! Lambda ZIPs are ready in: $ZIP_DIR"
 echo ""
-echo "Next steps:"
-echo "  1. terraform init"
-echo "  2. terraform plan"
-echo "  3. terraform apply"
