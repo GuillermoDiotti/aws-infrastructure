@@ -5,6 +5,7 @@
 resource "aws_secretsmanager_secret" "bedrock_config" {
   name        = "${var.project_name}/bedrock/config"
   description = "Bedrock model configuration for AI article generation"
+  recovery_window_in_days = 0  # Eliminar inmediatamente si ya existe
 
   tags = {
     Name = "${var.project_name}-bedrock-config"

@@ -105,6 +105,98 @@ resource "aws_api_gateway_integration" "post_articles" {
 }
 
 # ============================================
+# GET /comentarios - Lista comentarios
+# ============================================
+
+resource "aws_api_gateway_method" "get_comentarios" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.comentarios.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "get_comentarios" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.comentarios.id
+  http_method = aws_api_gateway_method.get_comentarios.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.get_comentarios_lambda_invoke_arn
+}
+
+# ============================================
+# POST /comentarios - Crear comentario
+# ============================================
+
+resource "aws_api_gateway_method" "post_comentarios" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.comentarios.id
+  http_method   = "POST"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "post_comentarios" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.comentarios.id
+  http_method = aws_api_gateway_method.post_comentarios.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.create_comentario_lambda_invoke_arn
+}
+
+# ============================================
+# OPTIONS /comentarios (CORS)
+# ============================================
+
+resource "aws_api_gateway_method" "options_comentarios" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.comentarios.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "options_comentarios" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.comentarios.id
+  http_method = aws_api_gateway_method.options_comentarios.http_method
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = jsonencode({ statusCode = 200 })
+  }
+}
+
+resource "aws_api_gateway_method_response" "options_comentarios_200" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.comentarios.id
+  http_method = aws_api_gateway_method.options_comentarios.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "options_comentarios_200" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.comentarios.id
+  http_method = aws_api_gateway_method.options_comentarios.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+
+  depends_on = [aws_api_gateway_integration.options_comentarios]
+}
+
+# ============================================
 # CORS - OPTIONS methods
 # ============================================
 
@@ -228,6 +320,26 @@ resource "aws_lambda_permission" "api_gateway_generate_article" {
 }
 
 # ============================================
+# LAMBDA PERMISSIONS - Comentarios
+# ============================================
+
+resource "aws_lambda_permission" "api_gateway_get_comentarios" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.get_comentarios_lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "api_gateway_create_comentario" {
+  statement_id  = "AllowAPIGatewayInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = var.create_comentario_lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+# ============================================
 # DEPLOYMENT
 # ============================================
 
@@ -260,6 +372,8 @@ resource "aws_api_gateway_deployment" "main" {
     aws_api_gateway_integration.get_articles,
     aws_api_gateway_integration.get_article_by_id,
     aws_api_gateway_integration.post_articles,
+    aws_api_gateway_integration.get_comentarios,      # AGREGAR
+    aws_api_gateway_integration.post_comentarios,
   ]
 }
 

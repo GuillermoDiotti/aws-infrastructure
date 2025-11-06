@@ -60,6 +60,12 @@ variable "private_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
+variable "private_subnet_2_cidr" {
+  description = "CIDR block for second private subnet"
+  type        = string
+  default     = "10.0.3.0/24"
+}
+
 variable "bedrock_model_id" {
   description = "Bedrock model ID for AI generation"
   type        = string
@@ -84,3 +90,4 @@ variable "static_site_cache_max_ttl" {
   type        = number
   default     = 86400  # 24 horas
 }
+

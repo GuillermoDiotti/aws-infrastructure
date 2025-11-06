@@ -18,6 +18,16 @@ output "private_subnet_id" {
   value       = aws_subnet.private.id
 }
 
+output "private_subnet_2_id" {
+  description = "Second Private Subnet ID (for RDS)"
+  value       = aws_subnet.private_2.id
+}
+
+output "private_subnet_ids" {
+  description = "List of private subnet IDs"
+  value       = [aws_subnet.private.id, aws_subnet.private_2.id]
+}
+
 output "lambda_security_group_id" {
   description = "Security Group ID for Lambda functions"
   value       = aws_security_group.lambda.id

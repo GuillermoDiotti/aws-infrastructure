@@ -1,1 +1,0 @@
-{"success": false, "error": "An error occurred (ValidationException) when calling the PutItem operation: One or more parameter values were invalid: Type mismatch for Index Key created_at Expected: S Actual: N IndexName: CreatedAtIndex+H+0bd819c5-3f56-3e76-9ae3-d71cc4404bbc", "error_type": "ClientError"}

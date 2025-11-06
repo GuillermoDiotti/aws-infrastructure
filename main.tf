@@ -22,10 +22,11 @@ module "amplify" {
 module "networking" {
   source = "./modules/networking"
 
-  project_name        = var.project_name
-  vpc_cidr            = var.vpc_cidr
-  public_subnet_cidr  = var.public_subnet_cidr
-  private_subnet_cidr = var.private_subnet_cidr
+  project_name          = var.project_name
+  vpc_cidr              = var.vpc_cidr
+  public_subnet_cidr    = var.public_subnet_cidr
+  private_subnet_cidr   = var.private_subnet_cidr
+  private_subnet_2_cidr = var.private_subnet_2_cidr
 }
 
 module "dynamodb" {
@@ -39,10 +40,10 @@ module "dynamodb" {
 module "rds" {
   source = "./modules/rds"
 
-  project_name              = var.project_name
-  vpc_id                    = module.networking.vpc_id
-  private_subnet_id         = module.networking.private_subnet_id
-  lambda_security_group_id  = module.networking.lambda_security_group_id
+  project_name               = var.project_name
+  vpc_id                     = module.networking.vpc_id
+  private_subnet_ids         = module.networking.private_subnet_ids
+  lambda_security_group_id   = module.networking.lambda_security_group_id
 
   postgres_version      = "15.4"
   instance_class        = "db.t3.micro"
