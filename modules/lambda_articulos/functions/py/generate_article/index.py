@@ -42,23 +42,18 @@ def handler(event, context):
         # Llamar a Bedrock (Claude 3 Haiku)
         print("🤖 Calling Bedrock...")
         response = bedrock.invoke_model(
-            modelId='anthropic.claude-3-haiku-20240307-v1:0',
+            modelId='us.meta.llama3-1-8b-instruct-v1:0',
             body=json.dumps({
-                "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": 2000,
+                "prompt": f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+                "max_gen_len": 2000,
                 "temperature": 0.7,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
+                "top_p": 0.9
             })
         )
 
         # Parsear respuesta
         response_body = json.loads(response['body'].read())
-        article_content = response_body['content'][0]['text']
+        article_content = response_body['generation'].strip()
 
         print(f"✅ Article generated: {len(article_content)} characters")
 

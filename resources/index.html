@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Gestión de Documentación - Infraestructura en la Nube">
+    <meta name="keywords" content="documentación, cloud, AWS, gestión documental">
+    <title>Sistema de Gestión Documental | Cloud Infrastructure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            border-radius: 10px;
+            color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .card p {
+            opacity: 0.9;
+        }
+
+        .features {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+
+        .features li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Sitio institucional</h1>
+            <p class="subtitle">Infraestructura escalable en la nube | AWS Cloud Architecture</p>
+        </header>
+
+        <div class="content">
+            <h2>Sobre Nuestro Sistema</h2>
+            <p>Plataforma moderna de gestión documental desplegada en AWS, diseñada para ofrecer escalabilidad, seguridad y alto rendimiento. Ideal para organizaciones que buscan centralizar y automatizar su documentación técnica.</p>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Disponibilidad</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">&lt;100ms</div>
+                    <div class="stat-label">Latencia promedio</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Monitoreo activo</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Escalabilidad</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <h2>Características Principales</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>📝 Generación Automática</h3>
+                    <p>Artículos generados automáticamente con IA generativa (AWS Bedrock), desacoplados del servicio principal para máxima eficiencia.</p>
+                </div>
+                <div class="card">
+                    <h3>💬 Sistema de Comentarios</h3>
+                    <p>Los usuarios pueden dejar comentarios directamente en la documentación, almacenados de forma segura en bases de datos aisladas.</p>
+                </div>
+                <div class="card">
+                    <h3>🔔 Notificaciones Inteligentes</h3>
+                    <p>Sistema de notificaciones automáticas para mantener a los usuarios informados sobre actualizaciones y cambios importantes.</p>
+                </div>
+                <div class="card">
+                    <h3>📊 Logs Centralizados</h3>
+                    <p>Todos los logs del sistema están centralizados en CloudWatch para monitoreo y debugging en tiempo real.</p>
+                </div>
+                <div class="card">
+                    <h3>🔒 Seguridad Avanzada</h3>
+                    <p>Implementación de principio de mínimo privilegio, redes privadas (VPC) y cifrado end-to-end.</p>
+                </div>
+                <div class="card">
+                    <h3>⚡ Alto Rendimiento</h3>
+                    <p>CDN global con CloudFront para tiempos de carga ultrarrápidos desde cualquier parte del mundo.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <h2>Arquitectura Cloud</h2>
+            <ul class="features">
+                <li><strong>Frontend:</strong> Aplicación React desplegada con AWS Amplify</li>
+                <li><strong>Backend:</strong> Arquitectura serverless con AWS Lambda</li>
+                <li><strong>Base de Datos:</strong> DynamoDB con índices secundarios globales</li>
+                <li><strong>API:</strong> API Gateway REST para comunicación segura</li>
+                <li><strong>IA Generativa:</strong> AWS Bedrock</li>
+                <li><strong>Automatización:</strong> EventBridge para tareas programadas</li>
+                <li><strong>Networking:</strong> VPC con subnets públicas y privadas, NAT Gateway</li>
+                <li><strong>Seguridad:</strong> Secrets Manager, Security Groups, IAM Roles</li>
+                <li><strong>CDN:</strong> CloudFront para caché y distribución global</li>
+                <li><strong>Infraestructura como Código:</strong> Terraform con módulos reutilizables</li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <h2>Stack Tecnológico</h2>
+            <div class="tech-stack">
+                <span class="tech-badge">AWS</span>
+                <span class="tech-badge">Terraform</span>
+                <span class="tech-badge">Lambda</span>
+                <span class="tech-badge">DynamoDB</span>
+                <span class="tech-badge">API Gateway</span>
+                <span class="tech-badge">Amplify</span>
+                <span class="tech-badge">CloudFront</span>
+                <span class="tech-badge">S3</span>
+                <span class="tech-badge">VPC</span>
+                <span class="tech-badge">CloudWatch</span>
+                <span class="tech-badge">Bedrock</span>
+                <span class="tech-badge">EventBridge</span>
+                <span class="tech-badge">React</span>
+                <span class="tech-badge">Python</span>
+            </div>
+        </div>
+
+        <div class="content" style="text-align: center;">
+            <h2>¿Listo para comenzar?</h2>
+            <p>Descubre cómo nuestro sistema puede transformar la gestión documental de tu organización.</p>
+            <a href="#" class="cta-button">Contáctanos</a>
+        </div>
+
+        <footer>
+            <p>© 2025 Sistema de Gestión Documental | Obligatorio 2 - Infraestructura en la Nube</p>
+            <p style="margin-top: 0.5rem; opacity: 0.8;">Universidad ORT Uruguay | Facultad de Ingeniería</p>
+        </footer>
+    </div>
+</body>
+</html>

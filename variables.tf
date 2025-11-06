@@ -4,6 +4,13 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "project_name" {
+  description = "Project name for resource naming and tagging"
+  type        = string
+  default     = "obligatorio-2"
+}
+
+
 variable "github_token" {
   description = "Personal Access Token de GitHub"
   type        = string
@@ -26,12 +33,6 @@ variable "branch_name" {
   description = "Nombre de la rama principal"
   type        = string
   default     = "main"
-}
-
-variable "project_name" {
-  description = "Project name for resource naming and tagging"
-  type        = string
-  default     = "obligatorio-2"
 }
 
 variable "environment" {
@@ -69,4 +70,17 @@ variable "article_generation_schedule" {
   description = "Schedule expression for automatic article generation"
   type        = string
   default     = "rate(15 minutes)"
+}
+
+variable "static_site_cache_ttl" {
+  description = "Default TTL for CloudFront cache (seconds)"
+  type        = number
+  default     = 3600  # 1 hora
+}
+
+
+variable "static_site_cache_max_ttl" {
+  description = "Max TTL for CloudFront cache (seconds)"
+  type        = number
+  default     = 86400  # 24 horas
 }

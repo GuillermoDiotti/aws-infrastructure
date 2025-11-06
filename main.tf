@@ -92,3 +92,18 @@ module "api_gateway" {
 
   depends_on = [module.networking, module.lambda_articulos]
 }
+
+module "static_site" {
+  source = "./modules/static_site"
+
+  project_name = var.project_name
+
+  # Opcional: Si quieres controlar el TTL del caché desde variables
+  cache_default_ttl = var.static_site_cache_ttl
+  cache_max_ttl     = var.static_site_cache_max_ttl
+
+  tags = {
+    Purpose = "institutional-website"
+    Type    = "static"
+  }
+}

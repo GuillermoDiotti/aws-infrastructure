@@ -6,7 +6,7 @@ variable "project_name" {
 variable "bedrock_model_id" {
   description = "Bedrock model ID to use"
   type        = string
-  default     = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+  default     = "us.meta.llama3-1-8b-instruct-v1:0"
 }
 
 variable "bedrock_temperature" {

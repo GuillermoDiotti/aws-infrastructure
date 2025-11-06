@@ -1,4 +1,5 @@
 # outputs.tf - CORREGIR
+
 output "deployment_commands" {
   description = "Comandos útiles para deployment"
   value = <<-EOT
@@ -101,5 +102,46 @@ output "phase1_summary" {
 
     🧪 Test (Mock Response):
        curl ${module.api_gateway.api_endpoint}/articles
+  EOT
+}
+
+
+
+output "institutional_site_url" {
+  description = "URL del sitio institucional estático"
+  value       = module.static_site.cloudfront_domain_name
+}
+
+output "institutional_site_s3_bucket" {
+  description = "Nombre del bucket S3 del sitio institucional"
+  value       = module.static_site.s3_bucket_name
+}
+
+output "institutional_site_cloudfront_id" {
+  description = "CloudFront Distribution ID del sitio institucional"
+  value       = module.static_site.cloudfront_distribution_id
+}
+
+output "deployment_summary" {
+  description = "Resumen completo del deployment"
+  value = <<-EOT
+
+    ✅ DEPLOYMENT COMPLETADO
+    ========================
+
+    📱 APLICACIÓN PRINCIPAL (React):
+
+   🏛️ SITIO INSTITUCIONAL (Estático):
+       URL: https://${module.static_site.cloudfront_domain_name}
+       S3 Bucket: ${module.static_site.s3_bucket_name}
+
+    🚪 API GATEWAY:
+       Base URL: ${module.api_gateway.api_endpoint}
+
+    🔄 Para invalidar caché de CloudFront:
+       aws cloudfront create-invalidation \
+         --distribution-id ${module.static_site.cloudfront_distribution_id} \
+         --paths "/*"
+
   EOT
 }
