@@ -16,14 +16,6 @@ class DecimalEncoder(json.JSONEncoder):
         return super(DecimalEncoder, self).default(obj)
 
 def handler(event, context):
-    """
-    Lambda para leer artículos de DynamoDB
-
-    Soporta:
-    - GET /articles -> Lista todos
-    - GET /articles/{id} -> Obtiene uno específico
-    """
-
     try:
         print(f"📥 Event received: {json.dumps(event)}")
 

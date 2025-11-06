@@ -3,6 +3,11 @@ import boto3
 import os
 import uuid
 from datetime import datetime, timedelta
+from decimal import Decimal
+import time
+import random
+from utils.constants import ARTICLE_TOPICS, ARTICLE_STYLES, ARTICLE_LENGTHS, ARTICLE_LENGTH_GUIDE
+from utils.articles_config import master_prompt
 
 dynamodb = boto3.resource('dynamodb')
 bedrock = boto3.client('bedrock-runtime')
@@ -14,32 +19,16 @@ def handler(event, context):
     try:
         print(f"📥 Event received: {json.dumps(event)}")
 
-        if 'body' in event:
-            body = json.loads(event['body']) if isinstance(event['body'], str) else event['body']
-            source = 'api_gateway'
-        else:
-            body = event
-            source = event.get('source', 'eventbridge')
-
-        topic = body.get('topic', 'technology')
-        style = body.get('style', 'informative')
-        length = body.get('length', 'medium')
+        source = 'eventbridge'
+        topic = random.choice(ARTICLE_TOPICS)
+        style = random.choice(ARTICLE_STYLES)
+        length = random.choice(ARTICLE_LENGTHS)
+        words = ARTICLE_LENGTH_GUIDE.get(length, '500')
 
         print(f"📝 Generating article: topic={topic}, style={style}, length={length}")
 
-        # Prompt para Bedrock
-        prompt = f"""Escribe un artículo {style} sobre {topic}.
-        El artículo debe tener una longitud {length} (aproximadamente 500 palabras para medium).
+        prompt = master_prompt(topic, style, length, words)
 
-        Estructura requerida:
-        - Empieza con un título claro y atractivo (usando # en markdown)
-        - Divide el contenido en secciones con subtítulos (usando ##)
-        - Usa un tono profesional pero accesible
-        - Incluye ejemplos concretos cuando sea relevante
-
-        Genera solo el artículo, sin introducción ni comentarios adicionales."""
-
-        # Llamar a Bedrock (Claude 3 Haiku)
         print("🤖 Calling Bedrock...")
         response = bedrock.invoke_model(
             modelId='us.meta.llama3-1-8b-instruct-v1:0',
@@ -72,7 +61,7 @@ def handler(event, context):
 
         # Generar ID y timestamps
         article_id = str(uuid.uuid4())
-        created_at = datetime.utcnow().isoformat() + 'Z'
+        created_at = Decimal(str(int(time.time())))
         ttl = int((datetime.utcnow() + timedelta(days=30)).timestamp())
 
         # Guardar en DynamoDB
@@ -89,9 +78,9 @@ def handler(event, context):
             'metadata': {
                 'word_count': len(content.split()),
                 'char_count': len(content),
-                'model': 'claude-3-haiku',
+                'model': 'llama3-1-8b',
                 'generated_by': 'bedrock',
-                'temperature': 0.7
+                'temperature': Decimal('0.7')
             }
         }
 
@@ -110,19 +99,7 @@ def handler(event, context):
             'message': 'Article generated successfully'
         }
 
-        # Si viene de API Gateway, formato específico
-        if 'body' in event:
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*'
-                },
-                'body': json.dumps(response_data)
-            }
-        else:
-            # Si viene de EventBridge, retorno simple
-            return response_data
+        return response_data
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")

@@ -172,9 +172,9 @@ resource "aws_cloudwatch_log_group" "cloudfront_logs" {
 resource "aws_s3_object" "index" {
   bucket       = aws_s3_bucket.institutional_site.id
   key          = "index.html"
-  source       = "${path.root}/resources/index.html"
+  source       = "${path.root}/static_page/index.html"
   content_type = "text/html"
-  etag         = filemd5("${path.root}/resources/index.html")
+  etag         = filemd5("${path.root}/static_page/index.html")
 
   tags = {
     Name = "index-page"
