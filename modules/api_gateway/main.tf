@@ -238,12 +238,17 @@ resource "aws_api_gateway_deployment" "main" {
     redeployment = sha1(jsonencode([
       aws_api_gateway_resource.articles.id,
       aws_api_gateway_resource.article_id.id,
+      aws_api_gateway_resource.comentarios.id,
       aws_api_gateway_method.get_articles.id,
       aws_api_gateway_method.get_article_by_id.id,
       aws_api_gateway_method.post_articles.id,
+      aws_api_gateway_method.get_comentarios.id,  # AGREGAR
+      aws_api_gateway_method.post_comentarios.id, # AGREGAR
       aws_api_gateway_integration.get_articles.id,
       aws_api_gateway_integration.get_article_by_id.id,
       aws_api_gateway_integration.post_articles.id,
+      aws_api_gateway_integration.get_comentarios.id,  # AGREGAR
+      aws_api_gateway_integration.post_comentarios.id, # AGREGAR
     ]))
   }
 
