@@ -36,6 +36,26 @@ module "dynamodb" {
   enable_streams                = false
 }
 
+module "rds" {
+  source = "./modules/rds"
+
+  project_name              = var.project_name
+  vpc_id                    = module.networking.vpc_id
+  private_subnet_id         = module.networking.private_subnet_id
+  lambda_security_group_id  = module.networking.lambda_security_group_id
+
+  postgres_version      = "15.4"
+  instance_class        = "db.t3.micro"
+  allocated_storage     = 20
+  db_name               = "comentarios_db"
+  db_username           = "dbadmin"
+
+  skip_final_snapshot   = true  # CAMBIAR A false EN PRODUCCIÓN
+  deletion_protection   = false # CAMBIAR A true EN PRODUCCIÓN
+
+  depends_on = [module.networking]
+}
+
 module "secrets_manager" {
   source = "./modules/secrets_manager"
 
