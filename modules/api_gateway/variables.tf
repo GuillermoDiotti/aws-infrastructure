@@ -22,6 +22,10 @@ variable "generate_article_lambda_invoke_arn" {
   description = "Invoke ARN of the generate_article Lambda function"
   type        = string
 }
+variable "get_comentarios_lambda_function_name" {
+  description = "Name of the get_comentarios Lambda function"
+  type        = string
+}
 
 variable "get_comentarios_lambda_invoke_arn" {
   description = "Invoke ARN of the get_comentarios Lambda function"

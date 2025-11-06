@@ -87,6 +87,22 @@ module "lambda_articulos" {
   ]
 }
 
+module "lambda_comentarios" {
+  source = "./modules/lambda_comentarios"
+
+  project_name                 = var.project_name
+  lambda_role_arn              = module.iam.lambda_role_arn
+  private_subnet_id            = module.networking.private_subnet_id
+  lambda_security_group_id     = module.networking.lambda_security_group_id
+  db_credentials_secret_name   = module.rds.db_credentials_secret_name
+
+  depends_on = [
+    module.networking,
+    module.rds,
+    module.iam
+  ]
+}
+
 module "eventbridge" {
   source = "./modules/eventbridge"
 
@@ -110,7 +126,16 @@ module "api_gateway" {
   generate_article_lambda_function_name = module.lambda_articulos.generate_article_function_name
   generate_article_lambda_invoke_arn    = module.lambda_articulos.generate_article_invoke_arn
 
-  depends_on = [module.networking, module.lambda_articulos]
+  get_comentarios_lambda_function_name   = module.lambda_comentarios.get_comentarios_function_name
+  get_comentarios_lambda_invoke_arn      = module.lambda_comentarios.get_comentarios_invoke_arn
+  create_comentario_lambda_function_name = module.lambda_comentarios.create_comentario_function_name
+  create_comentario_lambda_invoke_arn    = module.lambda_comentarios.create_comentario_invoke_arn
+
+  depends_on = [
+    module.networking,
+    module.lambda_articulos,
+    module.lambda_comentarios
+  ]
 }
 
 module "static_site" {
