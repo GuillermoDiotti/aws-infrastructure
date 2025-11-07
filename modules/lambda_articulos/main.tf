@@ -23,6 +23,8 @@ resource "aws_lambda_function" "generate_article" {
     variables = {
       DYNAMODB_TABLE = var.dynamodb_table_name
       REGION         = data.aws_region.current.name
+      SNS_TOPIC_ARN  = var.sns_topic_arn  # ✅ AGREGAR ESTA LÍNEA
+
     }
   }
 
@@ -52,7 +54,6 @@ resource "aws_lambda_function" "get_article" {
     variables = {
       DYNAMODB_TABLE = var.dynamodb_table_name
       REGION         = data.aws_region.current.name
-      SNS_TOPIC_ARN  = var.sns_topic_arn  # ✅ AGREGAR ESTA LÍNEA
 
     }
   }

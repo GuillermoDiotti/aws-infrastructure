@@ -134,25 +134,34 @@ def send_sns_notification(article_item):
     try:
         print("🔔 Sending SNS notification...")
 
-        message_data = {
-            'event_type': 'article_created',
-            'article': {
-                'id': article_item['id'],
-                'title': article_item['title'],
-                'topic': article_item['topic'],
-                'style': article_item['style'],
-                'length': article_item['length'],
-                'content': article_item['content'],
-                'word_count': article_item['metadata']['word_count'],
-                'created_at': article_item['created_at'],
-                'source': article_item['source']
-            }
-        }
+        formatted_message = f"""
+        ===========================================================
+                     🤖 NUEVO ARTÍCULO GENERADO POR IA
+        ===========================================================
+
+        📌 TÍTULO:
+        {article_item['title']}
+
+        📊 INFORMACIÓN:
+        • ID: {article_item['id']}
+        • Tema: {article_item['topic']}
+        • Estilo: {article_item['style']}
+        • Longitud: {article_item['length']}
+        • Palabras: {article_item['metadata']['word_count']}
+        • Fecha: {article_item['created_at']}
+        • Fuente: {article_item['source']}
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        💡 Este artículo fue generado automáticamente por el sistema de IA.
+        Modelo: {article_item['metadata']['model']}
+        Temperatura: {article_item['metadata']['temperature']}
+        """
 
         response = sns.publish(
             TopicArn=SNS_TOPIC_ARN,
             Subject=f"🤖 Nuevo Artículo: {article_item['title'][:50]}",
-            Message=json.dumps(message_data, indent=2, ensure_ascii=False),
+            Message=formatted_message,
             MessageAttributes={
                 'event_type': {
                     'DataType': 'String',
@@ -161,6 +170,10 @@ def send_sns_notification(article_item):
                 'topic': {
                     'DataType': 'String',
                     'StringValue': article_item['topic']
+                },
+                'article_id': {
+                    'DataType': 'String',
+                    'StringValue': article_item['id']
                 }
             }
         )

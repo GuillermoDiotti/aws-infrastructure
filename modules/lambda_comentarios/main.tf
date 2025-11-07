@@ -52,6 +52,8 @@ resource "aws_lambda_function" "create_comentario" {
       DB_SECRET_NAME = var.db_credentials_secret_name
       REGION         = data.aws_region.current.name
       PYTHONPATH     = "/var/task:/opt/python"  # Ensure layer is in path
+      SNS_TOPIC_ARN  = var.sns_topic_arn  # ✅ AGREGAR ESTA LÍNEA
+
     }
   }
 

@@ -22,3 +22,8 @@ variable "db_credentials_secret_name" {
   description = "Name of the Secrets Manager secret containing database credentials"
   type        = string
 }
+
+variable "sns_topic_arn" {
+  description = "ARN of SNS topic for notifications"
+  type        = string
+}

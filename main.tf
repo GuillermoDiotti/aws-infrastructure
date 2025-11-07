@@ -104,11 +104,15 @@ module "lambda_comentarios" {
   private_subnet_id            = module.networking.private_subnet_id
   lambda_security_group_id     = module.networking.lambda_security_group_id
   db_credentials_secret_name   = module.rds.db_credentials_secret_name
+  sns_topic_arn                = module.sns.topic_arn  # ✅ AGREGAR ESTA LÍNEA
+
 
   depends_on = [
     module.networking,
     module.rds,
-    module.iam
+    module.iam,
+    module.sns
+
   ]
 }
 

@@ -17,6 +17,8 @@ except ImportError as e:
 
 # AWS Clients
 secretsmanager = boto3.client('secretsmanager')
+sns = boto3.client('sns')
+SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN')
 
 # CORS headers
 CORS_HEADERS = {
@@ -177,6 +179,9 @@ def handler(event, context):
 
         print(f"✅ Comment created with ID: {comentario['id']}")
 
+        if SNS_TOPIC_ARN:
+            send_sns_notification(comentario)
+
         cursor.close()
         conn.close()
 
@@ -216,3 +221,50 @@ def handler(event, context):
                 'details': str(e) if os.environ.get('DEBUG') == 'true' else 'An error occurred'
             })
         }
+
+def send_sns_notification(comentario):
+    try:
+        print("🔔 Sending SNS notification...")
+
+        formatted_message = f"""
+        ===========================================================
+                     🤖 NUEVO COMENTARIO PUBLICADO
+        ===========================================================
+
+        📊 INFORMACIÓN:
+
+        📌 ID: {comentario['id']}
+
+        • nombre: {comentario['topic']}
+        • email: {comentario['style']}
+        • created_at: {comentario['metadata']['word_count']}
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        • comentario: {comentario['length']}
+
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        💡 Este comentario fue publicado por el usuario mencionado.
+           El mismo se captura en una base de datos RDS
+        """
+
+        response = sns.publish(
+            TopicArn=SNS_TOPIC_ARN,
+            Subject=f"🤖 Nuevo Comentario: {comentario['id'][:50]}",
+            Message=formatted_message,
+            MessageAttributes={
+                'event_type': {
+                    'DataType': 'String',
+                    'StringValue': 'acomment_created'
+                }
+            }
+        )
+
+        print(f"✅ SNS notification sent: MessageId={response['MessageId']}")
+        return True
+
+    except Exception as e:
+        print(f"⚠️ Error sending SNS notification: {str(e)}")
+        # No fallar si SNS falla - solo registrar error
+        return False
