@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import time
 import random
-from utils.constants import ARTICLE_TOPICS, ARTICLE_STYLES, ARTICLE_LENGTHS, ARTICLE_LENGTH_GUIDE
-from utils.articles_config import master_prompt
+from constants import ARTICLE_TOPICS, ARTICLE_STYLES, ARTICLE_LENGTHS, ARTICLE_LENGTH_GUIDE
+from prompt import master_prompt
 
 dynamodb = boto3.resource('dynamodb')
 bedrock = boto3.client('bedrock-runtime')
@@ -61,7 +61,7 @@ def handler(event, context):
 
         # Generar ID y timestamps
         article_id = str(uuid.uuid4())
-        created_at = Decimal(str(int(time.time())))
+        created_at = datetime.utcnow().isoformat() + 'Z'
         ttl = int((datetime.utcnow() + timedelta(days=30)).timestamp())
 
         # Guardar en DynamoDB

@@ -1,36 +1,49 @@
 #!/bin/bash
 
-set -e
+echo "🔨 Creating psycopg2 Lambda Layer"
+echo "=================================="
 
-echo "🔨 Creando Lambda Layer para psycopg2..."
-echo ""
+# Asegurarse de estar en el directorio correcto
+cd aws-infrastructure/modules/lambda_comentarios
 
-LAYER_DIR="modules/lambda_comentarios/layers"
-BUILD_DIR="$LAYER_DIR/python"
-ZIP_FILE="$LAYER_DIR/psycopg2-layer.zip"
-
-# Limpiar directorio anterior
-rm -rf "$BUILD_DIR"
-rm -f "$ZIP_FILE"
+# Limpiar directorios anteriores
+echo "🧹 Cleaning old files..."
+rm -rf aws-infrastructure/modules/lambda_comentarios/layers
+rm -f layers/psycopg2-layer.zip
 
 # Crear estructura
-mkdir -p "$BUILD_DIR"
+mkdir -p /modules/lambda_comentarios/layers/python
 
-echo "📦 Instalando psycopg2-binary..."
-pip install psycopg2-binary -t "$BUILD_DIR" --platform manylinux2014_x86_64 --only-binary=:all:
+# Instalar psycopg2-binary
+echo "📦 Installing psycopg2-binary..."
+pip3 install \
+  --platform manylinux2014_x86_64 \
+  --target=layers/python \
+  --implementation cp \
+  --python-version 3.12 \
+  --only-binary=:all: \
+  --upgrade \
+  psycopg2-binary
 
-echo "📦 Creando ZIP..."
-# Comprimir desde el directorio layers, incluyendo la carpeta python/
-(cd "$LAYER_DIR" && zip -r psycopg2-layer.zip python > /dev/null)
+if [ $? -ne 0 ]; then
+    echo "❌ Failed to install psycopg2-binary"
+    exit 1
+fi
 
-echo "✅ Layer creado exitosamente"
-echo ""
-ls -lh "$ZIP_FILE"
+# Crear el zip
+echo "🗜️  Creating zip file..."
+ce aws-infrastructure/modules/lambda_comentarios/layers
+zip -r psycopg2-layer.zip python/ > /dev/null
 
-# Limpiar carpeta de build
-rm -rf "$BUILD_DIR"
+if [ -f psycopg2-layer.zip ]; then
+    SIZE=$(du -h psycopg2-layer.zip | cut -f1)
+    echo "✅ Layer created successfully!"
+    echo "📍 Location: $(pwd)/psycopg2-layer.zip"
+    echo "📦 Size: $SIZE"
+else
+    echo "❌ Failed to create zip"
+    exit 1
+fi
 
-echo ""
-echo "📍 Ruta completa: $(pwd)/$ZIP_FILE"
-echo ""
-echo "🎉 ¡Listo! Ahora puedes ejecutar 'terraform apply'"
+cd ../..
+echo "✨ Done! Run 'terraform apply' to deploy the layer."

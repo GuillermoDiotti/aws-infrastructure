@@ -299,6 +299,8 @@ resource "aws_api_gateway_integration_response" "options_article_id_200" {
   depends_on = [aws_api_gateway_integration.options_article_id]
 }
 
+# En tu configuración de API Gateway
+
 # ============================================
 # LAMBDA PERMISSIONS
 # ============================================

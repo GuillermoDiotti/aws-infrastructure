@@ -5,6 +5,14 @@ import os
 
 secretsmanager = boto3.client('secretsmanager')
 
+# CORS headers to include in ALL responses
+CORS_HEADERS = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+}
+
 def get_db_credentials():
     secret_name = os.environ['DB_SECRET_NAME']
     try:
@@ -72,12 +80,7 @@ def handler(event, context):
 
         return {
             'statusCode': 200,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Methods': 'GET,OPTIONS'
-            },
+            'headers': CORS_HEADERS,
             'body': json.dumps({
                 'success': True,
                 'items': comentarios,
@@ -92,10 +95,7 @@ def handler(event, context):
 
         return {
             'statusCode': 500,
-            'headers': {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
+            'headers': CORS_HEADERS,
             'body': json.dumps({
                 'success': False,
                 'error': 'Error al obtener comentarios',

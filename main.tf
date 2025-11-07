@@ -45,7 +45,7 @@ module "rds" {
   private_subnet_ids         = module.networking.private_subnet_ids
   lambda_security_group_id   = module.networking.lambda_security_group_id
 
-  postgres_version      = "15.4"
+  postgres_version      = "15.8"
   instance_class        = "db.t3.micro"
   allocated_storage     = 20
   db_name               = "comentarios_db"

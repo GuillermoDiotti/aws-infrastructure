@@ -1,0 +1,97 @@
+✅ Lo que funciona bien:
+AWS Amplify para Docusaurus
+
+Muy buena idea: Amplify está diseñado específicamente para sitios estáticos/SSR como Docusaurus
+Ventajas:
+
+CI/CD automático desde GitHub (push → deploy automático)
+Hosting global con CDN incluido
+HTTPS automático
+Mucho más simple que EC2 + ALB
+Más económico: no pagas instancias 24/7
+Cumple perfectamente el requisito de "accesible desde internet"
+
+
+
+Lambda + EventBridge para artículos
+
+Correcto: Cumple el requisito de "generación desacoplada"
+EventBridge con cron cada 2 minutos: Técnicamente posible
+Integración con IA: Perfecto para el punto adicional
+
+
+⚠️ Puntos importantes a considerar:
+1. Sistema de Comentarios - El desafío principal
+Aquí viene el problema con Amplify:
+Requisito: "modificar el servicio de Docusaurus para agregar
+una opción de comentarios donde cualquier usuario pueda ingresar comentarios"
+Problema: Docusaurus en Amplify es 100% estático. No puede ejecutar código backend directamente.
+Soluciones posibles:
+Opción A - Híbrida (RECOMENDADA):
+Frontend (Amplify/Docusaurus)
+    ↓ (fetch/axios)
+API Gateway + Lambda
+    ↓
+RDS/DynamoDB
+
+El formulario de comentarios en Docusaurus hace peticiones AJAX a API Gateway
+Lambda procesa y guarda en base de datos
+Ventaja: Mantiene Amplify + cumple requisitos
+Desventaja: Necesitas configurar CORS correctamente
+
+Opción B - SSR con Next.js en Amplify:
+
+Cambiar de Docusaurus a Next.js (Amplify soporta SSR)
+Desventaja: No es Docusaurus como pide el obligatorio
+
+Opción C - EC2 tradicional:
+
+Volver a la arquitectura con EC2 + Node.js backend integrado
+Desventaja: Más complejo, más costoso
+
+2. Generación de artículos cada 2 minutos
+python# EventBridge mínimo: 1 minuto
+rate(2 minutes)  # ✅ VÁLIDO
+```
+
+**Consideraciones**:
+- **Costo**: Lambda ejecutándose 720 veces/día
+  - Si cada ejecución toma 10s con llamada a API de IA: ~7,200 segundos/día
+  - Con free tier: primeras 400,000 GB-segundos gratis
+  - **Probablemente estés cubierto**, pero documéntalo en costos
+
+- **Rate limits de APIs de IA**:
+  - OpenAI: límites por minuto/día
+  - **Bedrock (AWS)**: Mejor opción, está en la misma región, sin latencia externa
+  - **Solución**: Implementa retry logic y manejo de rate limits
+
+### **3. Almacenamiento de artículos generados**
+
+**Pregunta clave**: ¿Dónde guarda Lambda los artículos generados?
+
+**Opción A - S3 + rebuild Amplify** (complicado):
+```
+Lambda genera artículo.md
+    ↓
+S3 Bucket
+    ↓
+Trigger GitHub Action
+    ↓
+Push a repo → Amplify rebuild
+```
+**Problema**: Cada artículo dispara un rebuild de 2-5 minutos
+
+**Opción B - DynamoDB + renderizado dinámico** (mejor):
+```
+Lambda genera artículo
+    ↓
+DynamoDB
+    ↓
+Docusaurus carga artículos vía API en cliente
+```
+**Ventaja**: Sin rebuilds constantes
+
+**Opción C - S3 + acceso directo**:
+```
+Lambda → S3
+Docusaurus lee JSONs de S3 en runtime
