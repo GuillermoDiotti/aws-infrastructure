@@ -94,4 +94,5 @@ variable "static_site_cache_max_ttl" {
 variable "notification_email" {
   description = "Email address for SNS notifications"
   type        = string
+  default     = "mycloudinfrastructure@gmail.com"
 }

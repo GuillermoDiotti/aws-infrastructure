@@ -72,7 +72,6 @@ module "sns" {
 
   project_name        = var.project_name
   notification_email  = var.notification_email
-  discord_webhook_url = var.discord_webhook_url
 }
 
 module "lambda_articulos" {
@@ -85,13 +84,14 @@ module "lambda_articulos" {
   lambda_security_group_id  = module.networking.lambda_security_group_id
   bedrock_secret_name       = module.secrets_manager.bedrock_config_secret_name
   lambda_role_arn           = module.iam.lambda_role_arn
-
+  sns_topic_arn             = module.sns.topic_arn  # ✅ AGREGAR ESTA LÍNEA
 
   depends_on = [
     module.networking,
     module.dynamodb,
     module.secrets_manager,
-    module.iam
+    module.iam,
+    module.sns
 
   ]
 }
