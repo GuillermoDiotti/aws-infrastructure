@@ -145,3 +145,13 @@ output "deployment_summary" {
 
   EOT
 }
+
+output "sns_topic_arn" {
+  description = "SNS Topic ARN for notifications"
+  value       = module.sns.topic_arn
+}
+
+output "sns_topic_name" {
+  description = "SNS Topic name"
+  value       = module.sns.topic_name
+}

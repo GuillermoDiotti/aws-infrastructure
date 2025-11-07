@@ -136,3 +136,20 @@ resource "aws_iam_role_policy" "lambda_vpc" {
   })
 }
 
+resource "aws_iam_role_policy" "lambda_sns" {
+  name = "${var.project_name}-lambda-sns-policy"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:Publish"
+        ]
+        Resource = "arn:aws:sns:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:${var.project_name}-*"
+      }
+    ]
+  })
+}

@@ -11,8 +11,10 @@ from prompt import master_prompt
 
 dynamodb = boto3.resource('dynamodb')
 bedrock = boto3.client('bedrock-runtime')
+sns = boto3.client('sns')
 
 TABLE_NAME = os.environ['DYNAMODB_TABLE']
+SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN')
 table = dynamodb.Table(TABLE_NAME)
 
 def handler(event, context):
@@ -88,6 +90,9 @@ def handler(event, context):
         table.put_item(Item=item)
         print("✅ Article saved successfully")
 
+        if SNS_TOPIC_ARN:
+            send_sns_notification(item)
+
         # Respuesta
         response_data = {
             'success': True,
@@ -123,3 +128,47 @@ def handler(event, context):
             }
         else:
             return error_response
+
+
+def send_sns_notification(article_item):
+    try:
+        print("🔔 Sending SNS notification...")
+
+        message_data = {
+            'event_type': 'article_created',
+            'article': {
+                'id': article_item['id'],
+                'title': article_item['title'],
+                'topic': article_item['topic'],
+                'style': article_item['style'],
+                'length': article_item['length'],
+                'content': article_item['content'],
+                'word_count': article_item['metadata']['word_count'],
+                'created_at': article_item['created_at'],
+                'source': article_item['source']
+            }
+        }
+
+        response = sns.publish(
+            TopicArn=SNS_TOPIC_ARN,
+            Subject=f"🤖 Nuevo Artículo: {article_item['title'][:50]}",
+            Message=json.dumps(message_data, indent=2, ensure_ascii=False),
+            MessageAttributes={
+                'event_type': {
+                    'DataType': 'String',
+                    'StringValue': 'article_created'
+                },
+                'topic': {
+                    'DataType': 'String',
+                    'StringValue': article_item['topic']
+                }
+            }
+        )
+
+        print(f"✅ SNS notification sent: MessageId={response['MessageId']}")
+        return True
+
+    except Exception as e:
+        print(f"⚠️ Error sending SNS notification: {str(e)}")
+        # No fallar si SNS falla - solo registrar error
+        return False

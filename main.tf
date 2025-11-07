@@ -67,6 +67,14 @@ module "secrets_manager" {
 
 }
 
+module "sns" {
+  source = "./modules/sns"
+
+  project_name        = var.project_name
+  notification_email  = var.notification_email
+  discord_webhook_url = var.discord_webhook_url
+}
+
 module "lambda_articulos" {
   source = "./modules/lambda_articulos"
 

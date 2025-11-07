@@ -91,3 +91,7 @@ variable "static_site_cache_max_ttl" {
   default     = 86400  # 24 horas
 }
 
+variable "notification_email" {
+  description = "Email address for SNS notifications"
+  type        = string
+}

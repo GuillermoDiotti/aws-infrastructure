@@ -32,3 +32,8 @@ variable "bedrock_secret_name" {
   description = "Name of the Secrets Manager secret containing Bedrock configuration"
   type        = string
 }
+
+variable "sns_topic_arn" {
+  description = "ARN of SNS topic for notifications"
+  type        = string
+}
