@@ -44,3 +44,4 @@ terraform.rc
 # planout
 
 .env
+modules/lambda_comentarios/layers/

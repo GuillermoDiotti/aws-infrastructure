@@ -13,10 +13,10 @@ resource "aws_lambda_layer_version" "psycopg2" {
   filename            = "${path.module}/layers/psycopg2-layer.zip"
   layer_name          = "${var.project_name}-psycopg2-layer"
   compatible_runtimes = ["python3.12"]
-  description         = "PostgreSQL adapter for Python"
+  description         = "PostgreSQL adapter for Python 3.12"
 
-  # El archivo debe ser creado manualmente o con un script
-  # Ver: create_psycopg2_layer.sh
+  # Force recreation when zip changes
+  source_code_hash = filebase64sha256("${path.module}/layers/psycopg2-layer.zip")
 }
 
 # ============================================
@@ -35,8 +35,8 @@ resource "aws_lambda_function" "create_comentario" {
   role          = var.lambda_role_arn
   handler       = "index.handler"
   runtime       = "python3.12"
-  timeout       = 30
-  memory_size   = 256
+  timeout       = 60           # Increased from 30
+  memory_size   = 512          # Increased from 256
 
   source_code_hash = data.archive_file.create_comentario.output_base64sha256
 
@@ -51,6 +51,7 @@ resource "aws_lambda_function" "create_comentario" {
     variables = {
       DB_SECRET_NAME = var.db_credentials_secret_name
       REGION         = data.aws_region.current.name
+      PYTHONPATH     = "/var/task:/opt/python"  # Ensure layer is in path
     }
   }
 
@@ -75,8 +76,8 @@ resource "aws_lambda_function" "get_comentarios" {
   role          = var.lambda_role_arn
   handler       = "index.handler"
   runtime       = "python3.12"
-  timeout       = 30
-  memory_size   = 256
+  timeout       = 60           # Increased from 30
+  memory_size   = 512          # Increased from 256
 
   source_code_hash = data.archive_file.get_comentarios.output_base64sha256
 
@@ -91,6 +92,7 @@ resource "aws_lambda_function" "get_comentarios" {
     variables = {
       DB_SECRET_NAME = var.db_credentials_secret_name
       REGION         = data.aws_region.current.name
+      PYTHONPATH     = "/var/task:/opt/python"
     }
   }
 

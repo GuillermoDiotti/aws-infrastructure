@@ -1,13 +1,24 @@
 import json
 import boto3
-import psycopg2
 import os
+import sys
 from datetime import datetime
 
-# Clientes AWS
+print(f"Python version: {sys.version}")
+print(f"Python path: {sys.path}")
+
+# Try importing psycopg2
+try:
+    import psycopg2
+    print(f"✅ psycopg2 imported successfully: {psycopg2.__version__}")
+except ImportError as e:
+    print(f"❌ Failed to import psycopg2: {e}")
+    print(f"Available packages: {sys.modules.keys()}")
+
+# AWS Clients
 secretsmanager = boto3.client('secretsmanager')
 
-# CORS headers to include in ALL responses
+# CORS headers
 CORS_HEADERS = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -16,19 +27,28 @@ CORS_HEADERS = {
 }
 
 def get_db_credentials():
-    """Obtener credenciales de la base de datos desde Secrets Manager"""
-    secret_name = os.environ['DB_SECRET_NAME']
+    """Get database credentials from Secrets Manager"""
+    secret_name = os.environ.get('DB_SECRET_NAME')
+
+    if not secret_name:
+        raise ValueError("DB_SECRET_NAME environment variable not set")
+
+    print(f"Fetching secret: {secret_name}")
 
     try:
         response = secretsmanager.get_secret_value(SecretId=secret_name)
-        return json.loads(response['SecretString'])
+        credentials = json.loads(response['SecretString'])
+        print(f"✅ Credentials retrieved for host: {credentials.get('host', 'unknown')}")
+        return credentials
     except Exception as e:
-        print(f"Error getting credentials: {e}")
+        print(f"❌ Error getting credentials: {e}")
         raise
 
 def get_db_connection():
-    """Establecer conexión con PostgreSQL"""
+    """Establish PostgreSQL connection"""
     creds = get_db_credentials()
+
+    print(f"Connecting to: {creds['host']}:{creds['port']}/{creds['dbname']}")
 
     try:
         conn = psycopg2.connect(
@@ -36,19 +56,22 @@ def get_db_connection():
             port=creds['port'],
             database=creds['dbname'],
             user=creds['username'],
-            password=creds['password']
+            password=creds['password'],
+            connect_timeout=10
         )
+        print("✅ Database connection established")
         return conn
     except Exception as e:
-        print(f"Error connecting to database: {e}")
+        print(f"❌ Database connection failed: {e}")
         raise
 
 def init_database():
-    """Crear tabla si no existe"""
+    """Create table if not exists"""
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        print("Creating table if not exists...")
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS comentarios (
                 id SERIAL PRIMARY KEY,
@@ -59,7 +82,6 @@ def init_database():
             )
         """)
 
-        # Crear índice para ordenar por fecha
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_comentarios_created_at
             ON comentarios(created_at DESC)
@@ -69,14 +91,14 @@ def init_database():
         print("✅ Database initialized successfully")
     except Exception as e:
         conn.rollback()
-        print(f"Error initializing database: {e}")
+        print(f"❌ Error initializing database: {e}")
         raise
     finally:
         cursor.close()
         conn.close()
 
 def validate_comentario(data):
-    """Validar datos del comentario"""
+    """Validate comment data"""
     errors = []
 
     if not data.get('nombre') or len(data['nombre'].strip()) < 2:
@@ -91,15 +113,16 @@ def validate_comentario(data):
     return errors
 
 def handler(event, context):
-    """Lambda handler para crear comentarios"""
+    """Lambda handler for creating comments"""
 
-    print(f"📥 Event received: {json.dumps(event)}")
+    print(f"📥 Event received: {json.dumps(event, default=str)}")
+    print(f"Environment variables: {dict(os.environ)}")
 
     try:
-        # Inicializar DB (crear tabla si no existe)
+        # Initialize database
         init_database()
 
-        # Parsear body
+        # Parse body
         if 'body' in event:
             body = json.loads(event['body']) if isinstance(event['body'], str) else event['body']
         else:
@@ -112,7 +135,9 @@ def handler(event, context):
                 })
             }
 
-        # Validar datos
+        print(f"Parsed body: {body}")
+
+        # Validate data
         errors = validate_comentario(body)
         if errors:
             return {
@@ -124,7 +149,7 @@ def handler(event, context):
                 })
             }
 
-        # Insertar en base de datos
+        # Insert into database
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -147,10 +172,10 @@ def handler(event, context):
             'nombre': result[1],
             'email': result[2],
             'comentario': result[3],
-            'created_at': int(result[4] * 1000)  # Convertir a milisegundos
+            'created_at': int(result[4] * 1000)
         }
 
-        print(f"✅ Comentario created: {comentario['id']}")
+        print(f"✅ Comment created with ID: {comentario['id']}")
 
         cursor.close()
         conn.close()
@@ -165,8 +190,20 @@ def handler(event, context):
             })
         }
 
+    except psycopg2.OperationalError as e:
+        print(f"❌ Database operational error: {str(e)}")
+        return {
+            'statusCode': 503,
+            'headers': CORS_HEADERS,
+            'body': json.dumps({
+                'success': False,
+                'error': 'Database connection error',
+                'details': 'Unable to connect to database. Please try again later.'
+            })
+        }
+
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"❌ Unexpected error: {str(e)}")
         import traceback
         traceback.print_exc()
 
@@ -175,7 +212,7 @@ def handler(event, context):
             'headers': CORS_HEADERS,
             'body': json.dumps({
                 'success': False,
-                'error': 'Error al crear comentario',
-                'details': str(e)
+                'error': 'Internal server error',
+                'details': str(e) if os.environ.get('DEBUG') == 'true' else 'An error occurred'
             })
         }
