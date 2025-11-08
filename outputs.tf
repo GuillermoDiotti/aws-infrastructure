@@ -155,3 +155,13 @@ output "sns_topic_name" {
   description = "SNS Topic name"
   value       = module.sns.topic_name
 }
+
+output "comment_sns_topic_arn" {
+  description = "SNS Topic ARN for comment notifications"
+  value       = module.sns.comment_topic_arn
+}
+
+output "comment_sns_topic_name" {
+  description = "SNS Topic name for comments"
+  value       = module.sns.comment_topic_name
+}

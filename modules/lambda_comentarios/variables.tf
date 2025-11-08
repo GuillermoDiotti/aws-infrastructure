@@ -23,7 +23,7 @@ variable "db_credentials_secret_name" {
   type        = string
 }
 
-variable "sns_topic_arn" {
+variable "comment_sns_topic_arn" {
   description = "ARN of SNS topic for notifications"
   type        = string
 }

@@ -1,7 +1,3 @@
-# ============================================
-# PHASE 1: VPC + API Gateway (Bridge to VPC)
-# ============================================
-
 module "iam" {
   source = "./modules/iam"
 
@@ -18,7 +14,6 @@ module "amplify" {
   branch_name       = var.branch_name
 }
 
-# Networking Module - VPC con subnets públicas y privadas
 module "networking" {
   source = "./modules/networking"
 
@@ -51,8 +46,8 @@ module "rds" {
   db_name               = "comentarios_db"
   db_username           = "dbadmin"
 
-  skip_final_snapshot   = true  # CAMBIAR A false EN PRODUCCIÓN
-  deletion_protection   = false # CAMBIAR A true EN PRODUCCIÓN
+  skip_final_snapshot   = true
+  deletion_protection   = false
 
   depends_on = [module.networking]
 }
@@ -84,7 +79,7 @@ module "lambda_articulos" {
   lambda_security_group_id  = module.networking.lambda_security_group_id
   bedrock_secret_name       = module.secrets_manager.bedrock_config_secret_name
   lambda_role_arn           = module.iam.lambda_role_arn
-  sns_topic_arn             = module.sns.topic_arn  # ✅ AGREGAR ESTA LÍNEA
+  sns_topic_arn             = module.sns.topic_arn
 
   depends_on = [
     module.networking,
@@ -104,8 +99,7 @@ module "lambda_comentarios" {
   private_subnet_id            = module.networking.private_subnet_id
   lambda_security_group_id     = module.networking.lambda_security_group_id
   db_credentials_secret_name   = module.rds.db_credentials_secret_name
-  sns_topic_arn                = module.sns.topic_arn  # ✅ AGREGAR ESTA LÍNEA
-
+  comment_sns_topic_arn        = module.sns.comment_topic_arn  # ✅ AGREGAR ESTA LÍNEA
 
   depends_on = [
     module.networking,
@@ -126,14 +120,11 @@ module "eventbridge" {
 
   depends_on = [module.lambda_articulos]
 }
-
-# API Gateway Module - REST API como puente público
 module "api_gateway" {
   source = "./modules/api_gateway"
 
   project_name = var.project_name
 
-  # Conectar Lambdas
   get_article_lambda_function_name      = module.lambda_articulos.get_article_function_name
   get_article_lambda_invoke_arn         = module.lambda_articulos.get_article_invoke_arn
   generate_article_lambda_function_name = module.lambda_articulos.generate_article_function_name
@@ -156,7 +147,6 @@ module "static_site" {
 
   project_name = var.project_name
 
-  # Opcional: Si quieres controlar el TTL del caché desde variables
   cache_default_ttl = var.static_site_cache_ttl
   cache_max_ttl     = var.static_site_cache_max_ttl
 

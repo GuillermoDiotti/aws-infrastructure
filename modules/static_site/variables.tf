@@ -6,13 +6,13 @@ variable "project_name" {
 variable "cache_default_ttl" {
   description = "Default TTL for CloudFront cache in seconds"
   type        = number
-  default     = 3600  # 1 hora
+  default     = 3600  
 }
 
 variable "cache_max_ttl" {
   description = "Maximum TTL for CloudFront cache in seconds"
   type        = number
-  default     = 86400  # 24 horas
+  default     = 86400
 }
 
 variable "cache_min_ttl" {
