@@ -235,7 +235,7 @@ def send_sns_notification(comentario):
 
         📌 ID: {comentario['id']}
 
-        • Nombre: {comentario['name']}
+        • Nombre: {comentario['nombre']}
         • Email: {comentario['email']}
         • Fecha: {comentario['created_at']}
 
@@ -256,7 +256,7 @@ def send_sns_notification(comentario):
             MessageAttributes={
                 'event_type': {
                     'DataType': 'String',
-                    'StringValue': 'acomment_created'
+                    'StringValue': 'comment_created'
                 },
                 'comment_id': {
                     'DataType': 'String',
