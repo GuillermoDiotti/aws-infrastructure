@@ -43,7 +43,6 @@ module "cloudwatch_logging" {
     module.cloudtrail.cloudtrail_log_group,
 
     # SNS
-    module.sns.sns_log_group
   ]
 
   depends_on = [
@@ -54,8 +53,7 @@ module "cloudwatch_logging" {
     module.rds,
     module.eventbridge,
     module.networking,
-    module.cloudtrail,
-    module.sns
+    module.cloudtrail
   ]
 }
 

@@ -19,8 +19,3 @@ output "comment_topic_name" {
 }
 
 # modules/sns/outputs.tf - Agregar:
-
-output "sns_log_group" {
-  description = "CloudWatch log group for SNS"
-  value       = aws_cloudwatch_log_group.sns.name
-}

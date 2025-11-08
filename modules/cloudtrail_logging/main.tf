@@ -5,9 +5,19 @@ resource "aws_cloudtrail" "main" {
   is_multi_region_trail         = true
   enable_logging                = true
 
-  # DynamoDB data events
+  # Log all management events (IAM, DynamoDB management, SNS management, etc.)
   advanced_event_selector {
-    name = "Log DynamoDB events"
+    name = "Log all management events"
+
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Management"]
+    }
+  }
+
+  # Log DynamoDB data events (PutItem, GetItem, etc.)
+  advanced_event_selector {
+    name = "Log DynamoDB data events"
 
     field_selector {
       field  = "eventCategory"
@@ -17,61 +27,6 @@ resource "aws_cloudtrail" "main" {
     field_selector {
       field  = "resources.type"
       equals = ["AWS::DynamoDB::Table"]
-    }
-
-    field_selector {
-      field       = "resources.ARN"
-      starts_with = ["arn:aws:dynamodb:*:*:table/${var.project_name}-"]
-    }
-  }
-
-  # Secrets Manager data events
-  advanced_event_selector {
-    name = "Log Secrets Manager events"
-
-    field_selector {
-      field  = "eventCategory"
-      equals = ["Data"]
-    }
-
-    field_selector {
-      field  = "resources.type"
-      equals = ["AWS::SecretsManager::Secret"]
-    }
-
-    field_selector {
-      field       = "resources.ARN"
-      starts_with = ["arn:aws:secretsmanager:*:*:secret:${var.project_name}/"]
-    }
-  }
-
-  # SNS data events
-  advanced_event_selector {
-    name = "Log SNS events"
-
-    field_selector {
-      field  = "eventCategory"
-      equals = ["Data"]
-    }
-
-    field_selector {
-      field  = "resources.type"
-      equals = ["AWS::SNS::Topic"]
-    }
-
-    field_selector {
-      field       = "resources.ARN"
-      starts_with = ["arn:aws:sns:*:*:${var.project_name}-"]
-    }
-  }
-
-  # Management events (IAM, etc.)
-  advanced_event_selector {
-    name = "Log all management events"
-
-    field_selector {
-      field  = "eventCategory"
-      equals = ["Management"]
     }
   }
 
@@ -93,7 +48,8 @@ resource "aws_cloudwatch_log_group" "cloudtrail" {
 }
 
 resource "aws_s3_bucket" "cloudtrail" {
-  bucket = "${var.project_name}-cloudtrail-logs"
+  bucket        = "${var.project_name}-cloudtrail-logs"
+  force_destroy = true  # Allow Terraform to delete bucket even if not empty
 
   tags = {
     Name = "${var.project_name}-cloudtrail-bucket"

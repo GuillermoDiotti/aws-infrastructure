@@ -235,13 +235,13 @@ def send_sns_notification(comentario):
 
         📌 ID: {comentario['id']}
 
-        • nombre: {comentario['topic']}
-        • email: {comentario['style']}
-        • created_at: {comentario['metadata']['word_count']}
+        • Nombre: {comentario['name']}
+        • Email: {comentario['email']}
+        • Fecha: {comentario['created_at']}
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-        • comentario: {comentario['length']}
+        • Comentario: {comentario['comentario']}
 
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -251,12 +251,16 @@ def send_sns_notification(comentario):
 
         response = sns.publish(
             TopicArn=SNS_TOPIC_ARN,
-            Subject=f"🤖 Nuevo Comentario: {comentario['id'][:50]}",
+            Subject=f"🤖 Nuevo Comentario de {comentario['nombre']}",
             Message=formatted_message,
             MessageAttributes={
                 'event_type': {
                     'DataType': 'String',
                     'StringValue': 'acomment_created'
+                },
+                'comment_id': {
+                    'DataType': 'String',
+                    'StringValue': str(comentario['id'])
                 }
             }
         )
