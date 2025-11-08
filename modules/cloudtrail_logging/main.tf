@@ -1,4 +1,3 @@
-# modules/cloudtrail/main.tf (NUEVO MÓDULO)
 resource "aws_cloudtrail" "main" {
   name                          = "${var.project_name}-trail"
   s3_bucket_name                = aws_s3_bucket.cloudtrail.id
@@ -6,26 +5,73 @@ resource "aws_cloudtrail" "main" {
   is_multi_region_trail         = true
   enable_logging                = true
 
-  event_selector {
-    read_write_type           = "All"
-    include_management_events = true
+  # DynamoDB data events
+  advanced_event_selector {
+    name = "Log DynamoDB events"
 
-    # Logs de DynamoDB
-    data_resource {
-      type   = "AWS::DynamoDB::Table"
-      values = ["arn:aws:dynamodb:*:*:table/${var.project_name}-*"]
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Data"]
     }
 
-    # Logs de Secrets Manager
-    data_resource {
-      type   = "AWS::SecretsManager::Secret"
-      values = ["arn:aws:secretsmanager:*:*:secret:${var.project_name}/*"]
+    field_selector {
+      field  = "resources.type"
+      equals = ["AWS::DynamoDB::Table"]
     }
 
-    # Logs de SNS
-    data_resource {
-      type   = "AWS::SNS::Topic"
-      values = ["arn:aws:sns:*:*:${var.project_name}-*"]
+    field_selector {
+      field       = "resources.ARN"
+      starts_with = ["arn:aws:dynamodb:*:*:table/${var.project_name}-"]
+    }
+  }
+
+  # Secrets Manager data events
+  advanced_event_selector {
+    name = "Log Secrets Manager events"
+
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Data"]
+    }
+
+    field_selector {
+      field  = "resources.type"
+      equals = ["AWS::SecretsManager::Secret"]
+    }
+
+    field_selector {
+      field       = "resources.ARN"
+      starts_with = ["arn:aws:secretsmanager:*:*:secret:${var.project_name}/"]
+    }
+  }
+
+  # SNS data events
+  advanced_event_selector {
+    name = "Log SNS events"
+
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Data"]
+    }
+
+    field_selector {
+      field  = "resources.type"
+      equals = ["AWS::SNS::Topic"]
+    }
+
+    field_selector {
+      field       = "resources.ARN"
+      starts_with = ["arn:aws:sns:*:*:${var.project_name}-"]
+    }
+  }
+
+  # Management events (IAM, etc.)
+  advanced_event_selector {
+    name = "Log all management events"
+
+    field_selector {
+      field  = "eventCategory"
+      equals = ["Management"]
     }
   }
 

@@ -59,6 +59,34 @@ module "cloudwatch_logging" {
   ]
 }
 
+module "cloudwatch_alarms" {
+  source = "./modules/cloudwatch_alarms"
+
+  project_name = var.project_name
+  sns_topic_arn = module.sns.topic_arn
+
+  lambda_functions = {
+    generate_article    = module.lambda_articulos.generate_article_function_name
+    get_article         = module.lambda_articulos.get_article_function_name
+    create_comentario   = module.lambda_comentarios.create_comentario_function_name
+    get_comentarios     = module.lambda_comentarios.get_comentarios_function_name
+  }
+
+  depends_on = [
+    module.lambda_articulos,
+    module.lambda_comentarios,
+    module.sns
+  ]
+}
+
+module "budget" {
+  source = "./modules/budget"
+
+  project_name         = var.project_name
+  monthly_budget_limit = var.monthly_budget_limit
+  notification_email   = var.notification_email
+}
+
 module "amplify" {
   source = "./modules/amplify"
 
