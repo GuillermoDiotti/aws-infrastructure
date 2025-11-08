@@ -22,3 +22,10 @@ output "article_id_resource_id" {
   description = "Resource ID for /articles/{id}"
   value       = aws_api_gateway_resource.article_id.id
 }
+
+# Agregar a modules/api_gateway/outputs.tf:
+
+output "log_group_name" {
+  description = "CloudWatch log group name for API Gateway"
+  value       = aws_cloudwatch_log_group.api_gateway.name
+}

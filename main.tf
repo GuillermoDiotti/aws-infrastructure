@@ -5,6 +5,60 @@ module "iam" {
   dynamodb_table_arn  = module.dynamodb.table_arn
 }
 
+module "cloudtrail" {
+  source = "./modules/cloudtrail_logging"
+
+  project_name = var.project_name
+}
+
+module "cloudwatch_logging" {
+  source = "./modules/cloudwatch_logging"
+
+  project_name       = var.project_name
+  log_retention_days = 30
+
+  log_group_names = [
+    # Lambda functions
+    module.lambda_articulos.generate_article_log_group,
+    module.lambda_articulos.get_article_log_group,
+    module.lambda_comentarios.create_comentario_log_group,
+    module.lambda_comentarios.get_comentarios_log_group,
+
+    # API Gateway
+    module.api_gateway.log_group_name,
+
+    # Amplify
+    module.amplify.amplify_log_group,
+
+    # RDS
+    module.rds.rds_log_group,
+
+    # EventBridge
+    module.eventbridge.eventbridge_log_group,
+
+    # VPC Flow Logs
+    module.networking.vpc_flow_log_group,
+
+    # CloudTrail (DynamoDB, SNS, Secrets Manager, IAM)
+    module.cloudtrail.cloudtrail_log_group,
+
+    # SNS
+    module.sns.sns_log_group
+  ]
+
+  depends_on = [
+    module.lambda_articulos,
+    module.lambda_comentarios,
+    module.api_gateway,
+    module.amplify,
+    module.rds,
+    module.eventbridge,
+    module.networking,
+    module.cloudtrail,
+    module.sns
+  ]
+}
+
 module "amplify" {
   source = "./modules/amplify"
 

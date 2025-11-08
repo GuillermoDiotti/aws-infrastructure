@@ -28,3 +28,10 @@ output "branch_name" {
   description = "Branch name"
   value       = aws_amplify_branch.main.branch_name
 }
+
+# modules/amplify/outputs.tf - Agregar:
+
+output "amplify_log_group" {
+  description = "CloudWatch log group name for Amplify"
+  value       = aws_cloudwatch_log_group.amplify_build.name
+}

@@ -27,3 +27,15 @@ output "get_comentarios_invoke_arn" {
   description = "Get Comentarios Lambda invoke ARN (for API Gateway)"
   value       = aws_lambda_function.get_comentarios.invoke_arn
 }
+
+# Agregar a modules/lambda_comentarios/outputs.tf:
+
+output "create_comentario_log_group" {
+  description = "CloudWatch log group name for create_comentario"
+  value       = aws_cloudwatch_log_group.create_comentario.name
+}
+
+output "get_comentarios_log_group" {
+  description = "CloudWatch log group name for get_comentarios"
+  value       = aws_cloudwatch_log_group.get_comentarios.name
+}

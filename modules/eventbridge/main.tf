@@ -7,6 +7,8 @@ resource "aws_cloudwatch_event_rule" "generate_article_schedule" {
   description         = "Trigger article generation every 15 minutes"
   schedule_expression = var.schedule_expression
 
+  event_bus_name = "default"
+
   tags = {
     Name = "${var.project_name}-generate-article-schedule"
   }
@@ -41,3 +43,16 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.generate_article_schedule.arn
 }
+
+# modules/eventbridge/main.tf - Agregar al final:
+
+resource "aws_cloudwatch_log_group" "eventbridge" {
+  name              = "/aws/events/${var.project_name}-schedule"
+  retention_in_days = 7
+
+  tags = {
+    Name = "${var.project_name}-eventbridge-logs"
+  }
+}
+
+# Habilitar logging en la regla

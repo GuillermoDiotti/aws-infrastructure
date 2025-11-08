@@ -27,3 +27,15 @@ output "get_article_invoke_arn" {
   description = "Get Article Lambda invoke ARN (for API Gateway)"
   value       = aws_lambda_function.get_article.invoke_arn
 }
+
+# Agregar a modules/lambda_articulos/outputs.tf:
+
+output "generate_article_log_group" {
+  description = "CloudWatch log group name for generate_article"
+  value       = aws_cloudwatch_log_group.generate_article.name
+}
+
+output "get_article_log_group" {
+  description = "CloudWatch log group name for get_article"
+  value       = aws_cloudwatch_log_group.get_article.name
+}

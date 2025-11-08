@@ -42,3 +42,10 @@ output "internet_gateway_id" {
   description = "Internet Gateway ID"
   value       = aws_internet_gateway.main.id
 }
+
+# modules/networking/outputs.tf - Agregar:
+
+output "vpc_flow_log_group" {
+  description = "CloudWatch log group for VPC Flow Logs"
+  value       = aws_cloudwatch_log_group.vpc_flow_log.name
+}

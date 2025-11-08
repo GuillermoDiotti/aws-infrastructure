@@ -17,3 +17,10 @@ output "comment_topic_name" {
   description = "Name of the SNS topic for comments"
   value       = aws_sns_topic.comment_notifications.name
 }
+
+# modules/sns/outputs.tf - Agregar:
+
+output "sns_log_group" {
+  description = "CloudWatch log group for SNS"
+  value       = aws_cloudwatch_log_group.sns.name
+}

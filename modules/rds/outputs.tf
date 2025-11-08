@@ -32,3 +32,10 @@ output "db_credentials_secret_name" {
   description = "Name of the secret containing database credentials"
   value       = aws_secretsmanager_secret.db_credentials.name
 }
+
+# modules/rds/outputs.tf - Agregar:
+
+output "rds_log_group" {
+  description = "CloudWatch log group name for RDS"
+  value       = aws_cloudwatch_log_group.rds_postgresql.name
+}

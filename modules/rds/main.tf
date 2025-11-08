@@ -114,7 +114,44 @@ resource "aws_db_instance" "main" {
   auto_minor_version_upgrade = true
   deletion_protection        = var.deletion_protection
 
+  parameter_group_name = aws_db_parameter_group.postgres_logs.name
+
+  enabled_cloudwatch_logs_exports = ["postgresql"]  # ✅ Exportar logs a CloudWatch
+
+
   tags = {
     Name = "${var.project_name}-postgres"
+  }
+}
+
+# modules/rds/main.tf - Agregar después del aws_db_instance:
+
+# Habilitar logs de PostgreSQL
+resource "aws_db_parameter_group" "postgres_logs" {
+  name   = "${var.project_name}-postgres-logs"
+  family = "postgres15"
+
+  parameter {
+    name  = "log_statement"
+    value = "all"  # O "ddl" para solo cambios de esquema, "mod" para modificaciones
+  }
+
+  parameter {
+    name  = "log_min_duration_statement"
+    value = "1000"  # Log queries que tarden más de 1 segundo
+  }
+
+  tags = {
+    Name = "${var.project_name}-postgres-params"
+  }
+}
+
+# Actualizar el aws_db_instance para usar el parameter group:
+resource "aws_cloudwatch_log_group" "rds_postgresql" {
+  name              = "/aws/rds/instance/${var.project_name}-postgres/postgresql"
+  retention_in_days = 7
+
+  tags = {
+    Name = "${var.project_name}-rds-logs"
   }
 }

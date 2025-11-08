@@ -24,6 +24,9 @@ resource "aws_lambda_function" "generate_article" {
       DYNAMODB_TABLE = var.dynamodb_table_name
       REGION         = data.aws_region.current.name
       SNS_TOPIC_ARN  = var.sns_topic_arn  # ✅ AGREGAR ESTA LÍNEA
+      LOG_LEVEL        = "INFO"
+      POWERTOOLS_SERVICE_NAME = "articulos"
+      POWERTOOLS_LOG_LEVEL    = "INFO"
 
     }
   }

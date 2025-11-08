@@ -110,3 +110,12 @@ resource "aws_amplify_webhook" "main" {
   branch_name = aws_amplify_branch.main.branch_name
   description = "Webhook para builds automáticos en ${var.branch_name}"
 }
+
+resource "aws_cloudwatch_log_group" "amplify_build" {
+  name              = "/aws/amplify/${var.app_name}"
+  retention_in_days = 7
+
+  tags = {
+    Name = "${var.app_name}-amplify-logs"
+  }
+}
