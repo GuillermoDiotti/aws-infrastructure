@@ -1,44 +1,29 @@
-# ============================================
-# PROJECT CONFIGURATION
-# ============================================
-TF_VAR_aws_region=us-east-1
-TF_VAR_project_name=obligatorio-2
-TF_VAR_environment=dev
+# AWS Configuration
+aws_region = "us-east-1"
 
-# ============================================
-# AMPLIFY (FRONTEND)
-# ============================================
-TF_VAR_github_token=ghp_YOUR_GITHUB_TOKEN_HERE
-TF_VAR_github_repository=https://github.com/GuillermoDiotti/my-cloud-react-page
-TF_VAR_amplify_app_name=my-cloud-react-app
-TF_VAR_amplify_branch_name=main
+# Project Configuration
+project_name = "obligatorio-2"
+environment  = "dev"
 
-# ============================================
-# NETWORKING
-# ============================================
-TF_VAR_vpc_cidr=10.0.0.0/16
-TF_VAR_public_subnet_cidr=10.0.1.0/24
-TF_VAR_private_subnet_cidr=10.0.2.0/24
-TF_VAR_private_subnet_2_cidr=10.0.3.0/24
+# GitHub Configuration (for Amplify)
+github_token      = "your-token-here"
+github_repository = "https://github.com/GuillermoDiotti/my-cloud-react-page"
+app_name          = "my-cloud-react-app"
+branch_name       = "main"
 
-# ============================================
-# BEDROCK (IA)
-# ============================================
-TF_VAR_bedrock_model_id=anthropic.claude-3-5-sonnet-20241022-v2:0
-TF_VAR_article_generation_schedule=rate(15 minutes)
+# Network Configuration
+vpc_cidr              = "10.0.0.0/16"
+public_subnet_cidr    = "10.0.1.0/24"
+private_subnet_cidr   = "10.0.2.0/24"
+private_subnet_2_cidr = "10.0.3.0/24"
 
-# ============================================
-# EVENTBRIDGE
-# ============================================
-TF_VAR_article_generation_schedule=rate(15 minutes)
+# AI Configuration
+bedrock_model_id             = "us.meta.llama3-1-8b-instruct-v1:0"
+article_generation_schedule  = "rate(15 minutes)"
 
-# ============================================
-# CLOUDFRONT
-# ============================================
-STATIC_SITE_CACHE_TTL=3600
-STATIC_SITE_CACHE_MAX_TTL=86400
+# CloudFront Cache Configuration
+static_site_cache_ttl     = 3600
+static_site_cache_max_ttl = 86400
 
-# ============================================
-# SNS NOTIFICATIONS
-# ============================================
-TF_VAR_notification_email=mycloudinfrastructure@gmail.com
+# SNS Notifications
+notification_email = "your-mail-here"

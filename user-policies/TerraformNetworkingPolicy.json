@@ -1,0 +1,22 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:*Vpc*",
+                "ec2:*Subnet*",
+                "ec2:*Gateway*",
+                "ec2:*Route*",
+                "ec2:*SecurityGroup*",
+                "ec2:*NetworkInterface*",
+                "ec2:*Address*",
+                "ec2:*FlowLogs*",
+                "ec2:Describe*",
+                "ec2:CreateTags",
+                "ec2:DeleteTags"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
