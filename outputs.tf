@@ -1,5 +1,3 @@
-# outputs.tf - CORREGIR
-
 output "deployment_commands" {
   description = "Comandos útiles para deployment"
   value = <<-EOT
@@ -9,20 +7,41 @@ output "deployment_commands" {
 
     📍 URL de la app: ${module.amplify.amplify_app_url}
 
+    🏛️ SITIO INSTITUCIONAL (Estático):
+    URL: https://${module.static_site.cloudfront_domain_name}
+    S3 Bucket: ${module.static_site.s3_bucket_name}
+
+    🚪 API GATEWAY:
+    Base URL: ${module.api_gateway.api_endpoint}
+
+    POST ${module.api_gateway.api_endpoint}/articles
+    GET  ${module.api_gateway.api_endpoint}/articles
+    GET  ${module.api_gateway.api_endpoint}/articles/{id}
+
     🔧 Para ver logs:
-       aws amplify list-jobs --app-id ${module.amplify.amplify_app_id} --branch-name ${module.amplify.branch_name}
+    aws amplify list-jobs --app-id ${module.amplify.amplify_app_id} --branch-name ${module.amplify.branch_name}
 
     🔄 Para forzar un nuevo build:
-       aws amplify start-job --app-id ${module.amplify.amplify_app_id} --branch-name ${module.amplify.branch_name} --job-type RELEASE
+    aws amplify start-job --app-id ${module.amplify.amplify_app_id} --branch-name ${module.amplify.branch_name} --job-type RELEASE
 
     📊 Monitorear en consola:
-       https://console.aws.amazon.com/amplify/home?region=${data.aws_region.current.name}#/${module.amplify.amplify_app_id}
+    https://console.aws.amazon.com/amplify/home?region=${data.aws_region.current.name}#/${module.amplify.amplify_app_id}
+
+    🌐 VPC Configuration:
+    VPC ID: ${module.networking.vpc_id}
+    CIDR: ${module.networking.vpc_cidr}
+
+    Public Subnet:  ${module.networking.public_subnet_id}
+    Private Subnet 1: ${module.networking.private_subnet_id}
+    Private Subnet 2: ${module.networking.private_subnet_2_id}
+
+    NAT Gateway: ${module.networking.nat_gateway_id}
+    Internet Gateway: ${module.networking.internet_gateway_id}
+
+    🧪 Test (Mock Response):
+    curl ${module.api_gateway.api_endpoint}/articles
   EOT
 }
-
-# ============================================
-# NETWORKING OUTPUTS
-# ============================================
 
 output "vpc_id" {
   description = "VPC ID"
@@ -44,6 +63,11 @@ output "private_subnet_id" {
   value       = module.networking.private_subnet_id
 }
 
+output "private_subnet_2_id" {
+  description = "Private Subnet ID (Lambdas aquí)"
+  value       = module.networking.private_subnet_2_id
+}
+
 output "lambda_security_group_id" {
   description = "Security Group para Lambdas"
   value       = module.networking.lambda_security_group_id
@@ -53,10 +77,6 @@ output "nat_gateway_id" {
   description = "NAT Gateway ID"
   value       = module.networking.nat_gateway_id
 }
-
-# ============================================
-# API GATEWAY OUTPUTS
-# ============================================
 
 output "api_endpoint" {
   description = "API Gateway base URL"
@@ -72,41 +92,6 @@ output "api_endpoints" {
   }
 }
 
-# ============================================
-# PHASE 1 STATUS
-# ============================================
-
-output "phase1_summary" {
-  description = "Resumen de Phase 1"
-  value = <<-EOT
-
-    ✅ PHASE 1 COMPLETED: VPC + API Gateway
-    ========================================
-
-    🌐 VPC Configuration:
-       VPC ID: ${module.networking.vpc_id}
-       CIDR: ${module.networking.vpc_cidr}
-
-       Public Subnet:  ${module.networking.public_subnet_id}
-       Private Subnet: ${module.networking.private_subnet_id}
-
-       NAT Gateway: ${module.networking.nat_gateway_id}
-       Internet Gateway: ${module.networking.internet_gateway_id}
-
-    🚪 API Gateway (Bridge):
-       Base URL: ${module.api_gateway.api_endpoint}
-
-       POST ${module.api_gateway.api_endpoint}/articles
-       GET  ${module.api_gateway.api_endpoint}/articles
-       GET  ${module.api_gateway.api_endpoint}/articles/{id}
-
-    🧪 Test (Mock Response):
-       curl ${module.api_gateway.api_endpoint}/articles
-  EOT
-}
-
-
-
 output "institutional_site_url" {
   description = "URL del sitio institucional estático"
   value       = module.static_site.cloudfront_domain_name
@@ -120,30 +105,6 @@ output "institutional_site_s3_bucket" {
 output "institutional_site_cloudfront_id" {
   description = "CloudFront Distribution ID del sitio institucional"
   value       = module.static_site.cloudfront_distribution_id
-}
-
-output "deployment_summary" {
-  description = "Resumen completo del deployment"
-  value = <<-EOT
-
-    ✅ DEPLOYMENT COMPLETADO
-    ========================
-
-    📱 APLICACIÓN PRINCIPAL (React):
-
-   🏛️ SITIO INSTITUCIONAL (Estático):
-       URL: https://${module.static_site.cloudfront_domain_name}
-       S3 Bucket: ${module.static_site.s3_bucket_name}
-
-    🚪 API GATEWAY:
-       Base URL: ${module.api_gateway.api_endpoint}
-
-    🔄 Para invalidar caché de CloudFront:
-       aws cloudfront create-invalidation \
-         --distribution-id ${module.static_site.cloudfront_distribution_id} \
-         --paths "/*"
-
-  EOT
 }
 
 output "sns_topic_arn" {
