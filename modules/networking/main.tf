@@ -192,6 +192,10 @@ resource "aws_cloudwatch_log_group" "vpc_flow_log" {
   retention_in_days = 7
   skip_destroy      = false
 
+  lifecycle {
+    ignore_changes = []
+  }
+
   tags = {
     Name = "${var.project_name}-vpc-flow-logs"
   }

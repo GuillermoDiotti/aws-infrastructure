@@ -12,3 +12,21 @@ Cómo Docusaurus (estático) consume la API de comentarios vía JavaScript
 Rate limiting en generación de artículos (2 min puede ser agresivo)
 Costos de Lambda ejecutándose 720 veces/día
 CORS configuration entre Amplify y API Gateway
+
+└── 📁 src/                         # React application (separado)
+    ├── App.jsx
+    ├── main.jsx
+    ├── index.css
+    ├── config.js
+    ├── components/
+    │   ├── Navbar.jsx
+    │   └── Footer.jsx
+    ├── pages/
+    │   ├── Home.jsx
+    │   ├── AIArticles.jsx
+    │   └── Comentarios.jsx
+    └── lib/
+        ├── api.js
+        ├── constants.js
+        ├── utils.js
+        └── validators.js

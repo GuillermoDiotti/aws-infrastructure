@@ -44,7 +44,7 @@ Este proyecto implementa una **arquitectura cloud-native serverless completa** e
 - 🌐 **CDN global** con CloudFront
 - 🏛️ **Sitio institucional estático** con S3 + CloudFront
 
-### Arquitectura Cloud-Native
+### Arquitectura Simplificada Cloud-Native
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -90,15 +90,15 @@ Este proyecto implementa una **arquitectura cloud-native serverless completa** e
 ### 🤖 Generación de Artículos con IA
 
 - **AWS Bedrock (Llama 3.1 8B)** para generación de contenido
-- **Scheduler automático** cada 15 minutos vía EventBridge
-- **Temas dinámicos**: IA, Business, Finance, ML, Blockchain, etc.
+- **Scheduler automático** vía EventBridge (por defecto cada 15 minutos)
+- **Contenidos de los archivos dinámicos**: IA, Business, Finance, ML, Blockchain, etc.
 - **Persistencia en DynamoDB** con TTL de 30 días
 - **Metadata enriquecida**: word count, model info, timestamps
 
 ### 💬 Sistema de Comentarios
 
 - **Base de datos relacional** RDS PostgreSQL en VPC privada
-- **Validación de datos** en backend
+- **Validación de datos** en backend y frontend para mayor seguridad
 - **Almacenamiento seguro** con cifrado
 - **API RESTful** para CRUD operations
 
@@ -114,6 +114,7 @@ Este proyecto implementa una **arquitectura cloud-native serverless completa** e
 - **CloudWatch Alarms** para errores, throttles y latencia
 - **VPC Flow Logs** para análisis de tráfico
 - **CloudTrail** para auditoría de acciones
+- **Budget Alarms** para mayor control del presupuesto
 
 ### 🔒 Seguridad
 
@@ -121,7 +122,7 @@ Este proyecto implementa una **arquitectura cloud-native serverless completa** e
 - **Security Groups** restrictivos por servicio
 - **NAT Gateway** para acceso controlado a internet
 - **Secrets Manager** para credenciales
-- **IAM Roles** con principio de mínimo privilegio
+- **IAM Roles** siguiendo el principio de mínimo privilegio
 - **Cifrado en tránsito y reposo**
 
 ---
@@ -172,7 +173,7 @@ Este proyecto implementa una **arquitectura cloud-native serverless completa** e
 
 ### Infrastructure as Code
 - **Terraform 1.0+**: Gestión declarativa de infraestructura
-- **Módulos reutilizables**: 14 módulos custom
+- **Módulos reutilizables**
 
 ### Cloud Provider
 - **AWS**: 20+ servicios integrados
@@ -198,7 +199,6 @@ Este proyecto implementa una **arquitectura cloud-native serverless completa** e
 
 ### DevOps
 - **AWS Amplify**: CI/CD para frontend
-- **GitHub Actions**: (Opcional) Workflows automatizados
 
 ---
 
@@ -212,8 +212,13 @@ aws-infrastructure/
 ├── 📄 outputs.tf                   # Outputs del proyecto
 ├── 📄 data.tf                      # Data sources
 ├── 📄 .terraform.lock.hcl          # Lock de versiones
-├── 📄 terraform.tfvars.example     # Template de configuración
+├── 📄 terraform.tfvars.example     # Template de variables de configuración de terrform
+├── 📄 .env.example                 # Template de variables de configuración de entorno
 ├── 📄 amplify.yml                  # Build spec para Amplify
+|
+├── 📄 fronted_config.sh            # Bash para el envío del endpoint de la api gateway al front end
+├── 📄 user_cli.sh                  # Bash para la creación del usuario encargado de la AWS Cli
+├── 📄 .gitignore                   # Archivo gitignore
 │
 ├── 📁 modules/                     # Módulos de Terraform
 │   │
@@ -232,28 +237,30 @@ aws-infrastructure/
 │   │   ├── data.tf
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
-│   │   └── functions/
-│   │       └── py/
-│   │           ├── generate_article/
-│   │           │   ├── index.py
-│   │           │   ├── constants.py
-│   │           │   └── prompt.py
-│   │           └── get_article/
-│   │               └── index.py
+│   │   └── 📁 functions/
+│   │       ├── 📁 py/
+│   │       │   ├── 📁 generate_article/
+│   │       │   │   ├── index.py
+│   │       │   │   ├── constants.py
+│   │       │   │   └── prompt.py
+│   │       │   └── 📁 get_article/
+│   │       │       └── index.py
+│   │       └── 📁 zip/
 │   │
 │   ├── 📁 lambda_comentarios/      # Lambda para comentarios
 │   │   ├── main.tf
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   ├── create_psycopg2_layer.sh
-│   │   ├── layers/
+│   │   ├── 📁 layers/
 │   │   │   └── psycopg2-layer.zip
-│   │   └── functions/
-│   │       └── py/
-│   │           ├── create_comentario/
-│   │           │   └── index.py
-│   │           └── get_comentarios/
-│   │               └── index.py
+│   │   └── 📁 functions/
+│   │       ├── 📁 py/
+│   │       │   ├── 📁 create_comentario/
+│   │       │   │   └── index.py
+│   │       │   └── 📁 get_comentarios/
+│   │       │       └── index.py
+│   │       └── 📁 zip/
 │   │
 │   ├── 📁 dynamodb/                # NoSQL database
 │   │   ├── main.tf                 # Table + GSIs
@@ -318,30 +325,24 @@ aws-infrastructure/
 ├── 📁 static_page/                 # Sitio institucional
 │   └── index.html
 │
-└── 📁 src/                         # React application (separado)
-    ├── App.jsx
-    ├── main.jsx
-    ├── index.css
-    ├── config.js
-    ├── components/
-    │   ├── Navbar.jsx
-    │   └── Footer.jsx
-    ├── pages/
-    │   ├── Home.jsx
-    │   ├── AIArticles.jsx
-    │   └── Comentarios.jsx
-    └── lib/
-        ├── api.js
-        ├── constants.js
-        ├── utils.js
-        └── validators.js
+└── 📁 user-policies/               # Políticas de mínimo privilegio para AWS Cli
+    ├── TerraformAPIPolicy.json
+    ├── TerraformBillingPolicy.json
+    ├── TerraformComputePolicy.json
+    ├── TerraformDatabasePolicy.json
+    ├── TerraformNetworkingPolicy.json
+    ├── TerraformMessagingPolicy.json
+    ├── TerraformStoragePolicy.json
+    ├── TerraformMonitoringPolicy.json
+    └── TerraformSecurityPolicy.json
+
 ```
 
 ---
 
-## 📋 Prerequisitos
+## Primeros pasos
 
-### Software Requerido
+### 📋 Software Requerido
 
 ```bash
 # Terraform
@@ -359,16 +360,6 @@ node --version
 # Python (para Lambdas)
 python3 --version
 # Python 3.12
-```
-
-### Credenciales AWS
-
-```bash
-# Configurar AWS CLI
-aws configure
-
-# Verificar credenciales
-aws sts get-caller-identity
 ```
 
 ### GitHub Personal Access Token
@@ -390,7 +381,29 @@ git clone https://github.com/tu-usuario/aws-infrastructure.git
 cd aws-infrastructure
 ```
 
-### 2. Configurar Variables de Entorno
+### 2. Configuración de Credenciales IAM AWS
+
+**user-cli.sh** crea el user para AWS Cli con permisos de minimo privilegio
+
+```bash
+# Permisos de ejecución
+chmod +x user-cli.sh
+
+# Ejecución
+./ user-cli.sh
+# NOTA: Guardar las credenciales retornadas para el la configuración del IAM User en el siguiente paso
+
+# Configurar AWS CLI
+aws configure --profile terraform-cli
+
+# Asignar como usuario predeterminado (OPCIONAL)
+export AWS_PROFILE=terraform-cli
+
+# Verificar credenciales
+aws sts get-caller-identity
+```
+
+### 2. Configurar Variables de Entorno y de Terraform
 
 ```bash
 # Copiar template
@@ -398,19 +411,12 @@ cp terraform.tfvars.example terraform.tfvars
 
 # Editar con tus valores
 nano terraform.tfvars
-```
 
-**Variables críticas a configurar:**
+# Copiar template
+cp .env.example .env
 
-```hcl
-# terraform.tfvars
-TF_VAR_aws_region                = "us-east-1"
-TF_VAR_project_name              = "obligatorio-2"
-TF_VAR_environment               = "dev"
-TF_VAR_github_token              = "ghp_YOUR_TOKEN_HERE"
-TF_VAR_github_repository         = "https://github.com/tu-usuario/tu-repo"
-TF_VAR_notification_email        = "tu-email@ejemplo.com"
-TF_VAR_monthly_budget_limit      = 50
+# Editar con tus valores
+nano .env
 ```
 
 ### 3. Crear Layer de psycopg2 (PostgreSQL)
@@ -494,16 +500,38 @@ terraform output institutional_site_url
 
 ### Variables de Entorno - Frontend (React)
 
-Archivo: `src/config.js`
+Archivo: `frontend_config.sh`
 
-```javascript
-export const apiEndpoint = 'https://API_ID.execute-api.us-east-1.amazonaws.com/prod';
-```
-
-**Este valor se obtiene automáticamente de:**
 ```bash
-terraform output api_endpoint
+# Permisos de ejecución
+chmod +x user-cli.sh
+
+# Ejecución
+./ user-cli.sh
 ```
+
+**Se envía el endpoint de la API Gateway al Repositorio del Front-End. Al detectar cambios, Amplify comienzo a contruir la aplicación**
+
+**Tiempo Estimado: 5 minutos**
+
+---
+
+## 🧩 Módulos de Infraestructura
+
+### 1. **Amplify** - Frontend Deployment
+
+**Propósito**: Hosting y CI/CD para React app
+
+**Recursos creados**:
+- `aws_amplify_app`
+- `aws_amplify_branch`
+- `aws_amplify_webhook`
+- `aws_iam_role` (Amplify service role)
+
+**Features**:
+- Build automático en cada push a `main`
+- Node.js 20 configurado
+- Custom rules para React Router (SPA)
 
 ### Configuración de Amplify
 
@@ -530,43 +558,6 @@ frontend:
       - node_modules/**/*
 ```
 
-### Scheduler EventBridge
-
-Por defecto: **cada 15 minutos**
-
-Para cambiar:
-
-```hcl
-# terraform.tfvars
-TF_VAR_article_generation_schedule = "rate(30 minutes)"
-# o
-TF_VAR_article_generation_schedule = "cron(0 12 * * ? *)" # Diario a las 12:00 UTC
-```
-
-Después de cambiar:
-```bash
-terraform apply -var="article_generation_schedule=rate(30 minutes)"
-```
-
----
-
-## 🧩 Módulos de Infraestructura
-
-### 1. **Amplify** - Frontend Deployment
-
-**Propósito**: Hosting y CI/CD para React app
-
-**Recursos creados**:
-- `aws_amplify_app`
-- `aws_amplify_branch`
-- `aws_amplify_webhook`
-- `aws_iam_role` (Amplify service role)
-
-**Features**:
-- Build automático en cada push a `main`
-- Node.js 20 configurado
-- Custom rules para React Router (SPA)
-
 ---
 
 ### 2. **Networking** - VPC Infrastructure
@@ -585,21 +576,21 @@ terraform apply -var="article_generation_schedule=rate(30 minutes)"
 **Diagrama de red**:
 ```
 ┌─────────────────── VPC 10.0.0.0/16 ──────────────────┐
-│                                                       │
-│  ┌─── Public Subnet (10.0.1.0/24) ───┐              │
-│  │   - NAT Gateway                    │              │
-│  │   - Internet Gateway               │              │
-│  └────────────────────────────────────┘              │
-│                                                       │
-│  ┌─── Private Subnet 1 (10.0.2.0/24) ──┐            │
-│  │   - Lambda Functions                 │            │
-│  └──────────────────────────────────────┘            │
-│                                                       │
-│  ┌─── Private Subnet 2 (10.0.3.0/24) ──┐            │
-│  │   - RDS PostgreSQL                   │            │
-│  └──────────────────────────────────────┘            │
-│                                                       │
-└───────────────────────────────────────────────────────┘
+│                                                      │
+│  ┌─── Public Subnet (10.0.1.0/24) ───┐               │
+│  │   - NAT Gateway                   │               │
+│  │   - Internet Gateway              │               │
+│  └───────────────────────────────────┘               │
+│                                                      │
+│  ┌─── Private Subnet 1 (10.0.2.0/24) ──┐             │
+│  │   - Lambda Functions                │             │
+│  └─────────────────────────────────────┘             │
+│                                                      │
+│  ┌─── Private Subnet 2 (10.0.3.0/24) ──┐             │
+│  │   - RDS PostgreSQL                  │             │
+│  └─────────────────────────────────────┘             │
+│                                                      │
+└──────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -610,13 +601,13 @@ terraform apply -var="article_generation_schedule=rate(30 minutes)"
 
 **Endpoints configurados**:
 
-| Método | Path              | Lambda Target       | Descripción                |
-|--------|-------------------|---------------------|----------------------------|
-| GET    | /articles         | get_article         | Lista todos los artículos  |
-| GET    | /articles/{id}    | get_article         | Obtiene artículo por ID    |
+| Método | Path              | Lambda Target       | Descripción                    |
+|--------|-------------------|---------------------|--------------------------------|
+| GET    | /articles         | get_article         | Lista todos los artículos      |
+| GET    | /articles/{id}    | get_article         | Obtiene artículo por ID        |
 | POST   | /articles         | generate_article    | Genera nuevo artículo (manual) |
-| GET    | /comentarios      | get_comentarios     | Lista comentarios          |
-| POST   | /comentarios      | create_comentario   | Crea nuevo comentario      |
+| GET    | /comentarios      | get_comentarios     | Lista comentarios              |
+| POST   | /comentarios      | create_comentario   | Crea nuevo comentario          |
 
 **CORS habilitado** para todos los endpoints.
 
@@ -761,6 +752,22 @@ schedule_expression = "rate(15 minutes)"
 }
 ```
 
+Por defecto: **cada 15 minutos**
+
+Para cambiar:
+
+```hcl
+# terraform.tfvars
+TF_VAR_article_generation_schedule = "rate(30 minutes)"
+# o
+TF_VAR_article_generation_schedule = "cron(0 12 * * ? *)" # Diario a las 12:00 UTC
+```
+
+Después de cambiar:
+```bash
+terraform apply -var="article_generation_schedule=rate(30 minutes)"
+```
+
 ---
 
 ### 9. **Secrets Manager** - Credentials Storage
@@ -890,6 +897,7 @@ https://{api-id}.execute-api.us-east-1.amazonaws.com/prod
 
 Obtener con:
 ```bash
+# Endpoint de la API Gateway
 terraform output api_endpoint
 ```
 
@@ -1771,39 +1779,8 @@ SOFTWARE.
 
 ---
 
-## 👤 Autor
-
-**Guillermo Diotti**
-
-- Universidad ORT Uruguay
-- Facultad de Ingeniería
-- Infraestructura en la Nube - 2025
-
----
-
-## 🙏 Agradecimientos
-
-- Universidad ORT Uruguay
-- Equipo docente de Infraestructura en la Nube
-- AWS Documentation Team
-- Terraform Community
-- Open Source Contributors
-
----
-
-## 📮 Contacto
-
-Para preguntas, sugerencias o reportar issues:
-
-- **Email**: mycloudinfrastructure@gmail.com
-- **GitHub**: [@GuillermoDiotti](https://github.com/GuillermoDiotti)
-
----
-
 <div align="center">
 
-**⭐ Si este proyecto te fue útil, considera darle una estrella ⭐**
-
-Made with ❤️ and ☕ by Guillermo Diotti
+Made by Guillermo Diotti
 
 </div>
